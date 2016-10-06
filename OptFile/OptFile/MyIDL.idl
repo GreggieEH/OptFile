@@ -1,0 +1,348 @@
+// MyIDL.idl
+// IDL file for the Simple Com object
+
+#include <olectl.h>
+#include "dispids.h"
+
+[
+	uuid(B7C28E50-11F1-49bb-8A0A-46B3A89522B2),
+	helpstring(""),
+	version(1.0)
+]
+library OPTFile
+{
+	importlib("stdole32.tlb");
+	import "IDataSet.IDL";
+	[
+		uuid(618CCDF2-5921-44d5-8083-A33E71C28BB5),
+		helpstring("Interface")
+	]
+	dispinterface IOPTFile
+	{
+	properties:
+		[id(DISPID_DetectorInfo), readonly, helpstring("Detector Info")]
+		IDispatch	*	DetectorInfo;
+		[id(DISPID_InputInfo), readonly, helpstring("Input info")]
+		IDispatch	*	InputInfo;
+		[id(DISPID_SlitInfo), readonly, helpstring("Slit info")]
+		IDispatch	*	SlitInfo;
+		[id(DISPID_NumGratingScans), readonly, helpstring("Number of grating scans")]
+		long			NumGratingScans;
+		[id(DISPID_RadianceAvailable), readonly, helpstring("Flag radiance calculation available")]
+		VARIANT_BOOL	RadianceAvailable;
+		[id(DISPID_CalibrationStandard), bindable, helpstring("Calibration standard for calibration measurements")]
+		VARIANT			CalibrationStandard;
+		[id(DISPID_CalibrationMeasurement), bindable, helpstring("Flag calibration measurement")]
+		VARIANT_BOOL	CalibrationMeasurement;
+		[id(DISPID_OpticalTransferFunction), readonly, helpstring("Flag file is Optical transfer file data")]
+		VARIANT_BOOL	OpticalTransferFunction;
+		[id(DISPID_TimeStamp), readonly, helpstring("Starting time for acquisition")]
+		BSTR			TimeStamp;
+		[id(DISPID_ConfigFile), readonly, helpstring("Configuration file name")]
+		BSTR			ConfigFile;
+		[id(DISPID_ADInfoString), bindable, helpstring("AD info string")]
+		BSTR			ADInfoString;
+		[id(DISPID_Comment), bindable, helpstring("Comment string")]
+		BSTR			Comment;
+		[id(DISPID_AllowNegativeValues), bindable, helpstring("Allow negative values")]
+		VARIANT_BOOL	AllowNegativeValues;
+		[id(DISPID_ExtraValueTitles), readonly, helpstring("Extra value titles")]
+		SAFEARRAY(BSTR)	ExtraValueTitles;
+		[id(DISPID_SignalUnits), bindable, helpstring("Signal units")]
+		BSTR			SignalUnits;
+	methods:
+		[id(DISPID_Clone), helpstring("Clone this guy with no grating scan data")]
+		IDispatch	*	Clone();
+		[id(DISPID_Setup), helpstring("Display setup info for all, Detector Info or Input info")]
+		VARIANT_BOOL	Setup(
+							[in]			long			hwnd,
+							[in]			BSTR			Part);
+		[id(DISPID_GetGratingScan), helpstring("Get ith grating scan")]
+		IDispatch	*	GetGratingScan(
+							[in]			long			segment);
+		[id(DISPID_InitNew), helpstring("Initialize new object")]
+		VARIANT_BOOL	InitNew();
+		[id(DISPID_ReadConfig), helpstring("Read the configuration file")]
+		VARIANT_BOOL	ReadConfig(
+							[in]			BSTR			ConfigFile);
+		[id(DISPID_ReadINI), helpstring("Read the initialization file")]
+		void			ReadINI(
+							[in]			BSTR			IniFile);
+		[id(DISPID_WriteINI), helpstring("Write to the initialization file")]
+		void			WriteINI(
+							[in]			BSTR			IniFile);
+		[id(DISPID_SetExp), helpstring("Set filter and grating for scan")]
+		void			SetExp(
+							[in]			BSTR			Filter,
+							[in]			long			grating,
+							[in]			long			detector);
+		[id(DISPID_AddValue), helpstring("Add a scan value")]
+		void			AddValue(
+							[in]			double			NM,
+							[in]			double			Signal);
+		[id(DISPID_SaveToFile), helpstring("Save to file")]
+		void			SaveToFile(
+							[in]			BSTR			fileName);
+		[id(DISPID_LoadFromFile), helpstring("Load from file")]
+		VARIANT_BOOL	LoadFromFile(
+							[in]			BSTR			fileName);
+		[id(DISPID_ClearScanData), helpstring("Clear the scan data")]
+		void			ClearScanData();
+		[id(DISPID_SetSlitInfo), helpstring("Set slit info")]
+		void			SetSlitInfo(
+							[in]			BSTR			SlitTitle,
+							[in]			BSTR			SlitName,
+							[in]			double			slitWidth);
+		[id(DISPID_SelectCalibrationStandard), helpstring("Select Calibration standard")]
+		VARIANT_BOOL	SelectCalibrationStandard(
+							[in]			long			hwndMain);
+		[id(DISPID_ClearCalibrationStandard), helpstring("Clear the calibration standard")]
+		void			ClearCalibrationStandard();
+		[id(DISPID_LoadOpticalTransferFile), helpstring("Load the optical transfer function file")]
+		VARIANT_BOOL	LoadOpticalTransferFile(
+							[in]			BSTR			FileName);
+		[id(DISPID_DisplayRadiance), helpstring("Display Irradiance or Radiance")]
+		VARIANT_BOOL	DisplayRadiance(
+							[in]			long			hwnd,
+							[in]			VARIANT_BOOL	Radiance);
+		[id(DISPID_InitAcquisition), helpstring("Initialize the acquisition")]
+		VARIANT_BOOL	InitAcquisition(
+							[in]			long			hwnd,
+							[in]			VARIANT_BOOL	fCalibration);
+		[id(DISPID_ClearReadonly), helpstring("Clear the read only flag")]
+		void			ClearReadonly();
+		[id(DISPID_GetADChannel), helpstring("Get the AD channel appropriate for the entered wavelength in NM")]
+		long			GetADChannel(
+							[in]			double			wavelength);
+		[id(DISPID_SaveToString), helpstring("Save this object to string")]
+		BSTR			SaveToString();
+		[id(DISPID_LoadFromString), helpstring("Load from string")]
+		VARIANT_BOOL	LoadFromString(
+							[in]		BSTR			inputString);
+		[id(DISPID_FormOpticalTransferFile), helpstring("create an optical transfer file")]
+		VARIANT_BOOL	FormOpticalTransferFile(
+							[in]		BSTR			filePath);
+		[id(DISPID_GetExtraValues), helpstring("Get the extra values if exists")]
+		VARIANT_BOOL	GetExtraValues(
+							[in]		BSTR				Title,
+							[out]		SAFEARRAY(double)*	extraValues);
+		[id(DISPID_SetTimeStamp), helpstring("Set current time stamp")]
+		void			SetTimeStamp();
+	}
+	[
+		uuid(51AC4DB2-3762-401f-8858-2E3321557636),
+		helpstring(" event interface")
+	]
+	dispinterface _OPTFile
+	{
+	properties:
+	methods:
+		[id(DISPID_RequestSlitWidth), helpstring("Request slit width")]
+		void			RequestSlitWidth(
+							[in]			BSTR			slitName,
+							[out]			double		*	slitWidth,
+							[out]			VARIANT_BOOL*	fHandled);
+		[id(DISPID_RequestGetInputPort), helpstring("Request the current input port")]
+		void			RequestGetInputPort(
+							[out]			BSTR		*	portName,
+							[out]			VARIANT_BOOL*	fHandled);
+		[id(DISPID_RequestSetInputPort), helpstring("Request set the input port")]
+		void			RequestSetInputPort(
+							[in]			BSTR			portName,
+							[out]			VARIANT_BOOL*	fHandled);
+		[id(DISPID_RequestGetOutputPort), helpstring("Request the current output port")]
+		void			RequestGetOutputPort(
+							[out]			BSTR		*	portName,
+							[out]			VARIANT_BOOL*	fHandled);
+		[id(DISPID_RequestSetOutputPort), helpstring("Request set the current output port")]
+		void			RequestSetOutputPort(
+							[in]			BSTR			portName,
+							[out]			VARIANT_BOOL*	fHandled);
+	}
+	[
+		uuid(A7753A85-2C43-450b-8096-3979F1B625BD),
+		helpstring("class")
+	]
+	coclass OPTFile
+	{
+		[default]				dispinterface			IOPTFile;
+		[default, source]		dispinterface			_OPTFile;
+								dispinterface			_clsIDataSet;
+		[source]				dispinterface			__clsIDataSet;
+	}
+	[
+		uuid(AA55B107-72B2-4586-85BB-15E364184AA2),
+		helpstring("IGratingScanInfo interface")
+	]
+	dispinterface IGratingScanInfo
+	{
+	properties:
+		[id(DISPID_GratingScanInfo_NodeName)]
+		BSTR			NodeName;
+		[id(DISPID_GratingScanInfo_grating)]
+		long			grating;
+		[id(DISPID_GratingScanInfo_Filter)]
+		BSTR			Filter;
+		[id(DISPID_GratingScanInfo_dispersion)]
+		double			dispersion;
+		[id(DISPID_GratingScanInfo_Wavelengths)]
+		SAFEARRAY(double)	Wavelengths;
+		[id(DISPID_GratingScanInfo_Signals)]
+		SAFEARRAY(double)	Signals;
+		[id(DISPID_GratingScanInfo_amDirty), readonly]
+		VARIANT_BOOL	amDirty;
+		[id(DISPID_GratingScanInfo_arraySize), readonly]
+		long			arraySize;
+		[id(DISPID_GratingScanInfo_extraValues), readonly]
+		SAFEARRAY(VARIANT) extraValues;
+		[id(DISPID_GratingScanInfo_haveExtraValue), readonly]
+		VARIANT_BOOL	haveExtraValue;
+		[id(DISPID_GratingScanInfo_ExtraValuesTitles)]
+		SAFEARRAY(BSTR)	ExtraValueTitles;
+		[id(DISPID_GratingScanInfo_SignalUnits)]
+		BSTR			SignalUnits;
+		[id(DISPID_GratingScanInfo_Detector)]
+		long			Detector;
+	methods:
+		[id(DISPID_GratingScanInfo_getValue)]
+		double			getValue(
+							[in]		long		index);
+		[id(DISPID_GratingScanInfo_setValue)]
+		void			setValue(
+							[in]		long		index,
+							[in]		double		value);
+		[id(DISPID_GratingScanInfo_loadFromXML)]
+		VARIANT_BOOL	loadFromXML(
+							[in]		IDispatch	*	xml);
+		[id(DISPID_GratingScanInfo_saveToXML)]
+		VARIANT_BOOL	SaveToXML(
+							[in]	IDispatch		*	xml);
+		[id(DISPID_GratingScanInfo_addData)]
+		void			addData(
+							[in]		double		wave,
+							[in]		double		signal);
+		[id(DISPID_GratingScanInfo_ClearData)]
+		void			ClearData();
+		[id(DISPID_GratingScanInfo_clearDirty)]
+		void			clearDirty();
+		[id(DISPID_GratingScanInfo_findIndex)]
+		long			findIndex(
+							[in]		double		wavelength,
+							[in]		double		tolerance);
+		[id(DISPID_GratingScanInfo_setExtraValue)]
+		void			setExtraValue(
+							[in]		BSTR		title,
+							[in]		double		wavelength,
+							[in]		double		extraValue);
+		[id(DISPID_GratingScanInfo_ExtraValueComponent), propget, helpstring("Extra value single component")]
+		SAFEARRAY(double)	ExtraValueComponent(
+							[in]		BSTR		component);
+		[id(DISPID_GratingScanInfo_ExtraValueWavelengths), propget, helpstring("Extra value single component wavelengths")]
+		SAFEARRAY(double)	ExtraValueWavelengths(
+							[in]		BSTR			component);
+	}
+	[
+		uuid(F3290F8D-E4B9-457B-AADD-7DBA7A6FD3D2),
+		helpstring("Calibration standard")
+	]
+	dispinterface ICalibrationStandard
+	{
+	properties:
+		[id(DISPID_CalibrationStandard_amLoaded)]
+		VARIANT_BOOL		amLoaded;
+		[id(DISPID_CalibrationStandard_fileName)]
+		BSTR				fileName;
+		[id(DISPID_CalibrationStandard_wavelengths), readonly]
+		SAFEARRAY(double)	wavelengths;
+		[id(DISPID_CalibrationStandard_calibration), readonly]
+		SAFEARRAY(double)	calibration;
+		[id(DISPID_CalibrationStandard_expectedDistance)]
+		double				expectedDistance;
+		[id(DISPID_CalibrationStandard_sourceDistance)]
+		double				sourceDistance;
+	methods:
+		[id(DISPID_CalibrationStandard_loadFromXML)]
+		VARIANT_BOOL		loadFromXML(
+								[in]		IDispatch	*	xml);
+		[id(DISPID_CalibrationStandard_saveToXML)]
+		VARIANT_BOOL		saveToXML(
+								[in]		IDispatch	*	xml);
+		[id(DISPID_CalibrationStandard_loadExcelFile)]
+		VARIANT_BOOL		loadExcelFile(
+								[in]		BSTR			excelFile);
+		[id(DISPID_CalibrationStandard_checkExcelFile)]
+		VARIANT_BOOL		checkExcelFile(
+								[in]		BSTR			fileName);
+	}
+	[
+		uuid(73F7C087-4BB0-4470-BFF7-A59F9FDDADD3),
+		helpstring("IMyContainer interface")
+	]
+	dispinterface IMyContainer
+	{
+	properties:
+	methods:
+		[id(DISPID_Container_CreateObject), helpstring("Create an object")]
+		VARIANT_BOOL		CreateObject(
+								[in]			BSTR			ProgID,
+								[in]			BSTR			ObjectName,
+								[in]			BSTR			StorageFile,
+								[in]			long			left,
+								[in]			long			top,
+								[in]			long			right,
+								[in]			long			bottom);
+		[id(DISPID_Container_OnPropRequestEdit), helpstring("Property request edit")]
+		VARIANT_BOOL		OnPropRequestEdit(
+								[in]			BSTR			ObjectName,
+								[in]			long			Dispid);
+		[id(DISPID_Container_OnPropChanged), helpstring("Property changed event")]
+		void				OnPropChanged(
+								[in]			BSTR			ObjectName,
+								[in]			long			Dispid);
+		[id(DISPID_Container_OnSinkEvent), helpstring("Custom sink event")]
+		void				OnSinkEvent(
+								[in]			BSTR			ObjectName,
+								[in]			long			Dispid,
+								[in]			VARIANT			Parameters);
+		[id(DISPID_Container_CloseObject), helpstring("Close an object")]
+		void				CloseObject(
+								[in]			BSTR			ObjectName);
+		[id(DISPID_Container_AmbientProperty), propget, helpstring("Get an ambient property")]
+		VARIANT				AmbientProperty(
+								[in]			long			Dispid);
+		[id(DISPID_Container_GetNamedObject), helpstring("Get the named object, extended interface")]
+		IDispatch		*	GetNamedObject(
+								[in]			BSTR			ObjectName);
+		[id(DISPID_Container_CloseAllObjects), helpstring("Close all objects held by this container")]
+		void				CloseAllObjects();
+		[id(DISPID_Container_TryMNemonic), helpstring("Attempt to call MNemonic on object")]
+		VARIANT_BOOL		TryMNemonic(
+								[in]		SAFEARRAY(unsigned char) msg);
+	}
+	[
+		uuid(5A7834C6-8391-4F1F-ABF8-053774BC5C87),
+		helpstring("IMyExtended interface")
+	]
+	dispinterface IMyExtended
+	{
+	properties:
+		[id(DISPID_Name), readonly, helpstring("Name assigned to the object")]
+		BSTR				Name;
+		[id(DISPID_Object), readonly, helpstring("Active X object")]
+		IUnknown		*	Object;
+	methods:
+		[id(DISPID_Extended_DoCreateObject), helpstring("Create the object")]
+		VARIANT_BOOL		DoCreateObject(
+								[in]		long			hwndParent,
+								[in]		BSTR			StorageFile,
+								[in]		long			left,
+								[in]		long			top,
+								[in]		long			right,
+								[in]		long			bottom);
+		[id(DISPID_Extended_DoCloseObject), helpstring("Close the object")]
+		void				DoCloseObject();
+		[id(DISPID_Extended_TryMNemonic), helpstring("Attempt to call MNemonic on object")]
+		VARIANT_BOOL		TryNMemonic(
+								[in]		SAFEARRAY(unsigned char) msg);
+	}
+}
