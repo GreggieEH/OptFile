@@ -189,6 +189,9 @@
     <ClInclude Include="SciFileOpen.h" />
     <ClInclude Include="SciOutFile.h" />
     <ClInclude Include="SciXML.h" />
+    <ClInclude Include="ScriptDispatch.h" />
+    <ClInclude Include="ScriptHost.h" />
+    <ClInclude Include="ScriptSite.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="SlitInfo.h" />
     <ClInclude Include="stdafx.h" />
@@ -242,6 +245,9 @@
     <ClCompile Include="SciFileOpen.cpp" />
     <ClCompile Include="SciOutFile.cpp" />
     <ClCompile Include="SciXML.cpp" />
+    <ClCompile Include="ScriptDispatch.cpp" />
+    <ClCompile Include="ScriptHost.cpp" />
+    <ClCompile Include="ScriptSite.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="SlitInfo.cpp" />
     <ClCompile Include="stdafx.cpp">

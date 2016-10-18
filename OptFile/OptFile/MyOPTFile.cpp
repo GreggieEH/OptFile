@@ -19,6 +19,7 @@
 #include "dispids.h"
 #include "PropPageExtraData.h"
 #include "DataGainFactor.h"
+#include "ScriptDispatch.h"
 
 CMyOPTFile::CMyOPTFile(CMyObject * pMyObject) :
 	m_pMyObject(pMyObject),
@@ -227,6 +228,8 @@ BOOL CMyOPTFile::LoadFromString(
 	IDispatch	*	pdispConfigFile;			// config file path
 	TCHAR			szUnits[MAX_PATH];
 	IDispatch	*	pdispDefaultTitle;			// default title
+	CInputInfo		inputInfo;
+	IDispatch	*	pdisp;
 
 	if (this->GetAmLoaded()) return FALSE;		// can't load this twice
 	if (xml.loadFromString(szString))
@@ -279,15 +282,28 @@ BOOL CMyOPTFile::LoadFromString(
 					this->SetDefaultTitle(L"Voltage");
 					this->SetSignalUnits(L"V");
 				}
-
-				this->m_pInputInfo		= new CInputInfo;
-				this->m_pInputInfo->InitNew();
-				this->m_pInputInfo->loadFromXML(pdispXML);
-				double		fov;
-				if (this->m_pInputInfo->getRadianceAvailable(&fov))
+				this->m_pInputInfo = new CScriptDispatch(L"InputInfo.jvs");
+				if (this->m_pInputInfo->GetScript(&pdisp))
 				{
-					BOOL		stat = TRUE;
+					inputInfo.doInit(pdisp);
+					inputInfo.InitNew();
+					inputInfo.loadFromXML(pdispXML);
+					double		fov;
+					if (inputInfo.getRadianceAvailable(&fov))
+					{
+						BOOL		stat = TRUE;
+					}
+					pdisp->Release();
 				}
+
+		//		this->m_pInputInfo		= new CInputInfo;
+		//		this->m_pInputInfo->InitNew();
+		//		this->m_pInputInfo->loadFromXML(pdispXML);
+		//		double		fov;
+		//		if (this->m_pInputInfo->getRadianceAvailable(&fov))
+		//		{
+		//			BOOL		stat = TRUE;
+		//		}
 				this->m_pSlitInfo		= new CSlitInfo;
 				this->m_pSlitInfo->InitNew();
 				this->m_pSlitInfo->loadFromXML(pdispXML);
@@ -359,6 +375,8 @@ BOOL CMyOPTFile::SaveToString(
 	IDispatch	*	pdispConfigFile;	// config file node
 	TCHAR			szDefaultTitle[MAX_PATH];
 	IDispatch	*	pdispDefaultTitle;
+	IDispatch	*	pdisp;
+	CInputInfo		inputInfo;
 
 	*szString	= NULL;
 //	if (NULL == this->m_ppScans) return FALSE;
@@ -382,7 +400,13 @@ BOOL CMyOPTFile::SaveToString(
 			}
 			if (NULL != this->m_pInputInfo)
 			{
-				this->m_pInputInfo->saveToXML(pdispXML);
+		//		this->m_pInputInfo->saveToXML(pdispXML);
+				if (this->m_pInputInfo->GetScript(&pdisp))
+				{
+					inputInfo.doInit(pdisp);
+					inputInfo.saveToXML(pdispXML);
+					pdisp->Release();
+				}
 			}
 			if (NULL != this->m_pSlitInfo)
 			{
@@ -456,7 +480,10 @@ BOOL CMyOPTFile::SaveToString(
 				for (i=0; i<this->m_nScans; i++)
 					this->m_ppScans[i]->clearDirty();
 				if (NULL != this->m_pDetectorInfo) this->m_pDetectorInfo->clearDirty();
-				if (NULL != this->m_pInputInfo) this->m_pInputInfo->clearDirty();
+				if (NULL != this->m_pInputInfo)
+				{
+					inputInfo.clearDirty();
+				}
 				if (NULL != this->m_pSlitInfo) this->m_pSlitInfo->clearDirty();
 			}
 			pdispXML->Release();
@@ -469,6 +496,7 @@ BOOL CMyOPTFile::GetAmDirty()
 {
 	BOOL			fAmDirty	= FALSE;
 	long			i			= 0;
+	IDispatch	*	pdisp;
 
 	// check the grating scans
 	while (i < this->m_nScans && !fAmDirty)
@@ -478,7 +506,19 @@ BOOL CMyOPTFile::GetAmDirty()
 	}
 	if (fAmDirty) return TRUE;
 	if (NULL != this->m_pDetectorInfo) if (this->m_pDetectorInfo->GetamDirty()) return TRUE;
-	if (NULL != this->m_pInputInfo) if (this->m_pInputInfo->GetamDirty()) return TRUE;
+
+//	if (NULL != this->m_pInputInfo) if (this->m_pInputInfo->GetamDirty()) return TRUE;
+	if (NULL != this->m_pInputInfo)
+	{
+		if (this->m_pInputInfo->GetScript(&pdisp))
+		{
+			CInputInfo		inputInfo;
+			inputInfo.doInit(pdisp);
+			fAmDirty = inputInfo.GetamDirty();
+			pdisp->Release();
+		}
+		if (fAmDirty) return TRUE;
+	}
 	if (NULL != this->m_pSlitInfo) if (this->m_pSlitInfo->GetamDirty()) return TRUE;
 	return FALSE;
 }
@@ -501,8 +541,17 @@ BOOL CMyOPTFile::InitNew()
 	if (this->GetAmLoaded()) return FALSE;
 	this->m_pDetectorInfo	= new CDetectorInfo;
 	this->m_pDetectorInfo->InitNew();
-	this->m_pInputInfo		= new CInputInfo;
-	this->m_pInputInfo->InitNew();
+	this->m_pInputInfo = new CScriptDispatch(L"InputInfo.jvs");
+	IDispatch	*	pdisp;
+	if (this->m_pInputInfo->GetScript(&pdisp))
+	{
+		CInputInfo		inputInfo;
+		inputInfo.doInit(pdisp);
+		inputInfo.InitNew();
+		pdisp->Release();
+	}
+//		= new CInputInfo;
+//	this->m_pInputInfo->InitNew();
 	this->m_pSlitInfo		= new CSlitInfo;
 	this->m_pSlitInfo->InitNew();
 	this->m_pCalibrationStandard	= new CCalibrationStandard;
@@ -536,7 +585,7 @@ BOOL CMyOPTFile::GetInputInfo(
 {
 	if (NULL != this->m_pInputInfo)
 	{
-		return this->m_pInputInfo->getMyObject(ppdisp);
+		return this->m_pInputInfo->GetScript(ppdisp);
 	}
 	else
 	{
@@ -570,6 +619,19 @@ long CMyOPTFile::GetNumGratingScans()
 
 BOOL CMyOPTFile::GetRadianceAvailable()
 {
+	IDispatch	*	pdisp;
+	BOOL			radianceAvailable = FALSE;
+	CInputInfo		inputInfo;
+	double			fov;
+
+	if (this->GetInputInfo(&pdisp))
+	{
+		inputInfo.doInit(pdisp);
+		radianceAvailable = inputInfo.getRadianceAvailable(&fov);
+		pdisp->Release();
+	}
+	return radianceAvailable;
+/*
 	if (NULL != this->m_pInputInfo)
 	{
 		double				FOV;
@@ -577,6 +639,7 @@ BOOL CMyOPTFile::GetRadianceAvailable()
 	}
 	else
 		return FALSE;
+*/
 }
 
 BOOL CMyOPTFile::GetIrradianceAvailable()
@@ -1206,18 +1269,31 @@ BOOL CMyOPTFile::CalculateIrradiance(
 	double			DCOffset;			// DC signal offset
 	// parameters used for Radiance calc
 	double			fovFactor;
-	double			FOV;
+	double			FOV = 0.0;
 	double			PI = atan(1.0) * 4.0;
+	IDispatch	*	pdisp;
+	BOOL			fRadiance = FALSE;
 
 	*nValues = 0;
 	*ppWaves = NULL;
 	*ppSignal = NULL;
 	if (fRadianceCalc)
 	{
-		if (!this->m_pInputInfo->getRadianceAvailable(&FOV))
+//		if (!this->m_pInputInfo->getRadianceAvailable(&FOV))
+//		if (!this->GetRadianceAvailable())
+//		{
+//			return FALSE;
+//		}
+		if (this->GetInputInfo(&pdisp))
 		{
-			return FALSE;
+			CInputInfo		inputInfo;
+			inputInfo.doInit(pdisp);
+			fRadiance = inputInfo.getRadianceAvailable(&FOV);
+
+			pdisp->Release();
 		}
+		if (!fRadiance) return FALSE;
+
 		if (FOV == 0.0) FOV = 0.0017;
 //		fovFactor = 2.0 * PI * (1.0 - cos(FOV));
 		// correction for the fov factor Sept 26, 2016 - above off by factor 4
@@ -1875,8 +1951,8 @@ void CMyOPTFile::ClearReadonly()
 {
 	if (NULL != this->m_pDetectorInfo)
 		this->m_pDetectorInfo->SetamReadOnly(FALSE);
-	if (NULL != this->m_pInputInfo)
-		this->m_pInputInfo->SetamReadOnly(FALSE);
+//	if (NULL != this->m_pInputInfo)
+//		this->m_pInputInfo->SetamReadOnly(FALSE);
 	if (NULL != this->m_pSlitInfo)
 		this->m_pSlitInfo->SetamReadOnly(FALSE);
 	long			iScan;
@@ -2153,7 +2229,18 @@ double CMyOPTFile::GetLampDistanceFactor()
 {
 	if (this->GetCalibrationMeasurement())
 	{	
-		double			lampDistance = this->m_pInputInfo->GetlampDistance();
+		double			lampDistance = 1.0;
+		IDispatch	*	pdisp;
+
+		if (this->GetInputInfo(&pdisp))
+		{
+			CInputInfo		inputInfo;
+			inputInfo.doInit(pdisp);
+			lampDistance = inputInfo.GetlampDistance();
+			pdisp->Release();
+		}
+
+//		double			lampDistance = this->m_pInputInfo->GetlampDistance();
 		if (lampDistance < 1.0) lampDistance = 1.0;
 		return (50.0 * 50.0) / (lampDistance * lampDistance);
 	}

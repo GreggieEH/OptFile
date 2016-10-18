@@ -3,6 +3,7 @@
 #include "Server.h"
 #include <initguid.h>
 #include "MyGuids.h"
+#include <ActivScp.h>
 
 CServer * g_pServer = NULL;
 

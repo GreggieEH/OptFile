@@ -135,6 +135,15 @@
     <ClInclude Include="SlitInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ScriptHost.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptSite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScriptDispatch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -246,6 +255,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SlitInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptHost.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptSite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScriptDispatch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

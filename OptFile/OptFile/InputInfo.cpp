@@ -12,12 +12,12 @@ CInputInfo::~CInputInfo(void)
 
 BOOL CInputInfo::InitNew()
 {
-	if (this->doInit(TEXT("Sciencetech.InputInfo.wsc.1.00")))
-	{
-		this->InvokeMethod(TEXT("initNew"), NULL, 0, NULL);
-		return TRUE;
-	}
-	return FALSE;
+//	if (this->doInit(TEXT("Sciencetech.InputInfo.wsc.1.00")))
+//	{
+	this->InvokeMethod(TEXT("initNew"), NULL, 0, NULL);
+	return TRUE;
+//	}
+//	return FALSE;
 }
 
 BOOL CInputInfo::loadFromXML(
@@ -64,42 +64,82 @@ BOOL CInputInfo::saveToXML(
 
 BOOL CInputInfo::GetamReadOnly()
 {
-	return this->getBoolProperty(TEXT("amReadOnly"));
+//	return this->getBoolProperty(TEXT("amReadOnly"));
+	HRESULT			hr;
+	VARIANT			varResult;
+	BOOL			fReadonly = TRUE;
+	hr = this->InvokeMethod(L"get_amReadOnly", NULL, 0, &varResult);
+	if (SUCCEEDED(hr)) VariantToBoolean(varResult, &fReadonly);
+	return fReadonly;
 }
 
 void CInputInfo::SetamReadOnly(
 						BOOL			amReadOnly)
 {
-	this->setBoolProperty(TEXT("amReadOnly"), FALSE);
+//	this->setBoolProperty(TEXT("amReadOnly"), FALSE);
+//	VARIANTARG			varg;
+//	InitVariantFromBoolean(FALSE, &varg);
+//	this->InvokeMethod(L"")
 }
 
 double CInputInfo::GetlampDistance()
 {
-	return this->getDoubleProperty(TEXT("lampDistance"));
+	HRESULT			hr;
+	VARIANT			varResult;
+	double			lampDistance = 0.0;
+	hr = this->InvokeMethod(L"get_lampDistance", NULL, 0, &varResult);
+	if (SUCCEEDED(hr)) VariantToDouble(varResult, &lampDistance);
+	return lampDistance;
+//	return this->getDoubleProperty(TEXT("lampDistance"));
 }
 
 void CInputInfo::SetlampDistance(
 						double			lampDistance)
 {
-	this->setDoubleProperty(TEXT("lampDistance"), lampDistance);
+//	this->setDoubleProperty(TEXT("lampDistance"), lampDistance);
+	VARIANTARG			varg;
+	InitVariantFromDouble(lampDistance, &varg);
+	this->InvokeMethod(L"put_lampDistance", &varg, 1, NULL);
 }
 
 BOOL CInputInfo::GetinputOpticConfig(
 						LPTSTR			szinputOpticConfig,
 						UINT			nBufferSize)
 {
-	return this->getStringProperty(TEXT("inputOpticConfig"), szinputOpticConfig, nBufferSize);
+//	return this->getStringProperty(TEXT("inputOpticConfig"), szinputOpticConfig, nBufferSize);
+	HRESULT			hr;
+	VARIANT			varResult;
+	BOOL			fSuccess = FALSE;
+	szinputOpticConfig[0] = '\0';
+	hr = this->InvokeMethod(L"get_inputOpticConfig", NULL, 0, &varResult);
+	if (SUCCEEDED(hr))
+	{
+		hr = VariantToString(varResult, szinputOpticConfig, nBufferSize);
+		fSuccess = SUCCEEDED(hr);
+		VariantClear(&varResult);
+	}
+	return fSuccess;
 }
 
 void CInputInfo::SetinputOpticConfig(
 						LPCTSTR			szinputOpticConfig)
 {
-	this->setStringProperty(TEXT("inputOpticConfig"), szinputOpticConfig);
+//	this->setStringProperty(TEXT("inputOpticConfig"), szinputOpticConfig);
+	VARIANTARG			varg;
+	InitVariantFromString(szinputOpticConfig, &varg);
+	this->InvokeMethod(L"put_inputOpticConfig", &varg, 1, NULL);
+	VariantClear(&varg);
 }
 
 BOOL CInputInfo::GetamDirty()
 {
-	return this->getBoolProperty(TEXT("amDirty"));
+//	return this->getBoolProperty(TEXT("amDirty"));
+	HRESULT			hr;
+	VARIANT			varResult;
+	BOOL			amDirty = TRUE;
+	hr = this->InvokeMethod(L"get_amDirty", NULL, 0, &varResult);
+	if (SUCCEEDED(hr)) VariantToBoolean(varResult, &amDirty);
+	return amDirty;
 }
 
 void CInputInfo::clearDirty()
@@ -109,7 +149,13 @@ void CInputInfo::clearDirty()
 
 long CInputInfo::GetnumInputConfigs()
 {
-	return this->getLongProperty(TEXT("numInputConfigs"));
+//	return this->getLongProperty(TEXT("numInputConfigs"));
+	HRESULT			hr;
+	VARIANT			varResult;
+	long			nConfig = 0;
+	hr = this->InvokeMethod(L"get_numInputConfigs", NULL, 0, &varResult);
+	if (SUCCEEDED(hr)) VariantToInt32(varResult, &nConfig);
+	return nConfig;
 }
 
 BOOL CInputInfo::getInputConfig(
@@ -170,7 +216,10 @@ BOOL CInputInfo::getRadianceAvailable(double * FOV)
 void CInputInfo::SetuserSetinput(
 	double			userSetinput)
 {
-	this->setDoubleProperty(L"userSetinput", userSetinput);
+//	this->setDoubleProperty(L"userSetinput", userSetinput);
+	VARIANTARG			varg;
+	InitVariantFromDouble(userSetinput, &varg);
+	this->InvokeMethod(L"put_userSetinput", &varg, 1, NULL);
 
 	TCHAR			szString[MAX_PATH];
 	this->GetinputOpticConfig(szString, MAX_PATH);
@@ -185,7 +234,8 @@ BOOL CInputInfo::GetuserSetinput(
 	BOOL				fUserInput = FALSE;
 	TCHAR				szString[MAX_PATH];
 	*userSetInput = 0.0;
-	hr = this->getProperty(L"userSetinput", &varResult);
+//	hr = this->getProperty(L"userSetinput", &varResult);
+	hr = this->InvokeMethod(L"get_userSetinput", NULL, 0, &varResult);
 	if (SUCCEEDED(hr))
 	{
 		if (VT_BSTR == varResult.vt)

@@ -1,7 +1,10 @@
 #pragma once
-#include "DispObject.h"
-class DataGainFactor :
-	public CDispObject
+#include "ScriptDispatch.h"
+
+class CScriptHost;
+
+//#include "DispObject.h"
+class DataGainFactor : public CScriptDispatch
 {
 public:
 	DataGainFactor();

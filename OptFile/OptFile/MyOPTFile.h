@@ -3,10 +3,11 @@
 class CMyObject;
 class CDetectorInfo;
 class CGratingScanInfo;
-class CInputInfo;
+//class CInputInfo;
 class CSlitInfo;
 class CCalibrationStandard;
 class DataGainFactor;
+class CScriptDispatch;
 
 class CMyOPTFile
 {
@@ -297,7 +298,8 @@ private:
 	// detector info
 	CDetectorInfo	*	m_pDetectorInfo;
 	// input info
-	CInputInfo		*	m_pInputInfo;
+//	CInputInfo		*	m_pInputInfo;
+	CScriptDispatch	*	m_pInputInfo;
 	// slit info
 	CSlitInfo		*	m_pSlitInfo;
 	// calibration standard
