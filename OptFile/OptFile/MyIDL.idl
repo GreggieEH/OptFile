@@ -13,6 +13,7 @@ library OPTFile
 {
 	importlib("stdole32.tlb");
 	import "IDataSet.IDL";
+	import "ISummaryInfo.idl";
 	[
 		uuid(618CCDF2-5921-44d5-8083-A33E71C28BB5),
 		helpstring("Interface")
@@ -169,6 +170,7 @@ library OPTFile
 		[default, source]		dispinterface			_OPTFile;
 								dispinterface			_clsIDataSet;
 		[source]				dispinterface			__clsIDataSet;
+								dispinterface			ISummaryInfo;
 	}
 	[
 		uuid(AA55B107-72B2-4586-85BB-15E364184AA2),

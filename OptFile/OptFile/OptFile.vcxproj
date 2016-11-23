@@ -100,7 +100,7 @@
     </Link>
     <Midl>
       <TypeLibraryName>mylib.tlb</TypeLibraryName>
-      <AdditionalIncludeDirectories>G:\Users\Greg\Documents\Temp Old Computer\IDataSet</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>G:\Users\Greg\Documents\Temp Old Computer\IDataSet;C:\Users\Greg\Documents\Visual Studio 2015\Projects\Summary Info</AdditionalIncludeDirectories>
     </Midl>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

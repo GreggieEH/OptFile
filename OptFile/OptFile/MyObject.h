@@ -411,17 +411,113 @@ private:
 		CMyObject			*	m_pBackObj;
 		IUnknown			*	m_punkOuter;
 	};
+	class CImpIPersistFile : public IPersistFile
+	{
+	public:
+		CImpIPersistFile(CMyObject * pBackObj, IUnknown * punkOuter);
+		~CImpIPersistFile();
+		// IUnknown methods
+		STDMETHODIMP			QueryInterface(
+									REFIID			riid,
+									LPVOID		*	ppv);
+		STDMETHODIMP_(ULONG)	AddRef();
+		STDMETHODIMP_(ULONG)	Release();
+		// IPersist method
+		STDMETHODIMP			GetClassID(
+									CLSID		*	pClassID);
+		// IPersistFile methods
+		STDMETHODIMP			GetCurFile(
+									LPOLESTR	*	ppszFileName);
+		STDMETHODIMP			IsDirty();
+		STDMETHODIMP			Load(
+									LPCOLESTR		pszFileName,
+									DWORD			dwMode);
+		STDMETHODIMP			Save(
+									LPCOLESTR		pszFileName,
+									BOOL			fRemember);
+		STDMETHODIMP			SaveCompleted(
+									LPCOLESTR		pszFileName);
+	private:
+		CMyObject			*	m_pBackObj;
+		IUnknown			*	m_punkOuter;
+		LPTSTR					m_szFileName;
+		BOOL					m_fNoScribble;
+	};
+	class CImpISummaryInfo : public IDispatch
+	{
+	public:
+		CImpISummaryInfo(CMyObject * pBackObj, IUnknown * punkOuter);
+		~CImpISummaryInfo();
+		// IUnknown methods
+		STDMETHODIMP			QueryInterface(
+									REFIID			riid,
+									LPVOID		*	ppv);
+		STDMETHODIMP_(ULONG)	AddRef();
+		STDMETHODIMP_(ULONG)	Release();
+		// IDispatch methods
+		STDMETHODIMP			GetTypeInfoCount(
+									PUINT			pctinfo);
+		STDMETHODIMP			GetTypeInfo(
+									UINT			iTInfo,
+									LCID			lcid,
+									ITypeInfo	**	ppTInfo);
+		STDMETHODIMP			GetIDsOfNames(
+									REFIID			riid,
+									OLECHAR		**  rgszNames,
+									UINT			cNames,
+									LCID			lcid,
+									DISPID		*	rgDispId);
+		STDMETHODIMP			Invoke(
+									DISPID			dispIdMember,
+									REFIID			riid,
+									LCID			lcid,
+									WORD			wFlags,
+									DISPPARAMS	*	pDispParams,
+									VARIANT		*	pVarResult,
+									EXCEPINFO	*	pExcepInfo,
+									PUINT			puArgErr);
+		HRESULT					MyInit();
+	protected:
+		HRESULT					GetComment(
+									VARIANT		*	pVarResult);
+		HRESULT					GetXData(
+									VARIANT		*	pVarResult);
+		HRESULT					GetYData(
+									VARIANT		*	pVarResult);
+		HRESULT					GetAcquisitionDate(
+									VARIANT		*	pVarResult);
+		HRESULT					GetXRange(
+									DISPPARAMS	*	pDispParams,
+									VARIANT		*	pVarResult);
+		HRESULT					GetYRange(
+									DISPPARAMS	*	pDispParams,
+									VARIANT		*	pVarResult);
+	private:
+		CMyObject			*	m_pBackObj;
+		IUnknown			*	m_punkOuter;
+		ITypeInfo			*	m_pTypeInfo;
+		DISPID					m_dispidComment;
+		DISPID					m_dispidXData;
+		DISPID					m_dispidYData;
+		DISPID					m_dispidAcquisitionDate;
+		DISPID					m_dispidXRange;
+		DISPID					m_dispidYRange;
+	};
 	friend CImpIDispatch;
 	friend CImpIConnectionPointContainer;
 	friend CImpIProvideClassInfo2;
 	friend CImp_clsIDataSet;
 	friend CImpIPersistStreamInit;
+	friend CImpIPersistFile;
+	friend CImpISummaryInfo;
 	// data members
 	CImpIDispatch			*	m_pImpIDispatch;
 	CImpIConnectionPointContainer*	m_pImpIConnectionPointContainer;
 	CImpIProvideClassInfo2	*	m_pImpIProvideClassInfo2;
 	CImp_clsIDataSet		*	m_pImp_clsIDataSet;
 	CImpIPersistStreamInit	*	m_pImpIPersistStreamInit;
+	CImpIPersistFile		*	m_pImpIPersistFile;
+	CImpISummaryInfo		*	m_pImpISummaryInfo;
 	// outer unknown for aggregation
 	IUnknown				*	m_pUnkOuter;
 	// object reference count
@@ -438,4 +534,6 @@ private:
 	DISPID						m_dispidrequestOpticalTransfer;
 	DISPID						m_dispidrequestCalibrationScan;
 	DISPID						m_dispidrequestCalibrationGain;
+	// summary info type info
+	IID							m_iidISummayInfo;
 };

@@ -12,6 +12,8 @@ CMyObject::CMyObject(IUnknown * pUnkOuter) :
 	m_pImpIProvideClassInfo2(NULL),
 	m_pImp_clsIDataSet(NULL),
 	m_pImpIPersistStreamInit(NULL),
+	m_pImpIPersistFile(NULL),
+	m_pImpISummaryInfo(NULL),
 	// outer unknown for aggregation
 	m_pUnkOuter(pUnkOuter),
 	// object reference count
@@ -25,7 +27,9 @@ CMyObject::CMyObject(IUnknown * pUnkOuter) :
 	m_dispidrequestDispersion(DISPID_UNKNOWN),
 	m_dispidrequestOpticalTransfer(DISPID_UNKNOWN),
 	m_dispidrequestCalibrationScan(DISPID_UNKNOWN),
-	m_dispidrequestCalibrationGain(DISPID_UNKNOWN)
+	m_dispidrequestCalibrationGain(DISPID_UNKNOWN),
+	// summary info type info
+	m_iidISummayInfo(IID_NULL)
 {
 	if (NULL == this->m_pUnkOuter) this->m_pUnkOuter = this;
 	for (ULONG i=0; i<MAX_CONN_PTS; i++)
@@ -39,6 +43,8 @@ CMyObject::~CMyObject(void)
 	Utils_DELETE_POINTER(this->m_pImpIProvideClassInfo2);
 	Utils_DELETE_POINTER(this->m_pImp_clsIDataSet);
 	Utils_DELETE_POINTER(this->m_pImpIPersistStreamInit);
+	Utils_DELETE_POINTER(this->m_pImpIPersistFile);
+	Utils_DELETE_POINTER(this->m_pImpISummaryInfo);
 	for (ULONG i=0; i<MAX_CONN_PTS; i++)
 		Utils_RELEASE_INTERFACE(this->m_paConnPts[i]);
 	Utils_DELETE_POINTER(this->m_pMyOPTFile);
@@ -62,6 +68,10 @@ STDMETHODIMP CMyObject::QueryInterface(
 		*ppv = this->m_pImp_clsIDataSet;
 	else if (IID_IPersist == riid || IID_IPersistStreamInit == riid)
 		*ppv = this->m_pImpIPersistStreamInit;
+	else if (IID_IPersistFile == riid)
+		*ppv = this->m_pImpIPersistFile;
+	else if (riid == this->m_iidISummayInfo)
+		*ppv = this->m_pImpISummaryInfo;
 	if (NULL != *ppv)
 	{
 		((IUnknown*)*ppv)->AddRef();
@@ -101,12 +111,16 @@ HRESULT CMyObject::Init()
 	this->m_pImpIProvideClassInfo2			= new CImpIProvideClassInfo2(this, this->m_pUnkOuter);
 	this->m_pImp_clsIDataSet				= new CImp_clsIDataSet(this, this->m_pUnkOuter);
 	this->m_pImpIPersistStreamInit			= new CImpIPersistStreamInit(this, this->m_pUnkOuter);
+	this->m_pImpIPersistFile				= new CImpIPersistFile(this, this->m_pUnkOuter);
+	this->m_pImpISummaryInfo				= new CImpISummaryInfo(this, this->m_pUnkOuter);
 	this->m_pMyOPTFile						= new CMyOPTFile(this);
 	if (NULL != this->m_pImpIDispatch					&&
 		NULL != this->m_pImpIConnectionPointContainer	&&
 		NULL != this->m_pImpIProvideClassInfo2			&&
 		NULL != this->m_pImp_clsIDataSet				&&
 		NULL != this->m_pImpIPersistStreamInit			&&
+		NULL != this->m_pImpIPersistFile				&&
+		NULL != this->m_pImpISummaryInfo				&&
 		NULL != this->m_pMyOPTFile)
 	{
 		hr = this->Init__clsIDataSet();
@@ -123,6 +137,10 @@ HRESULT CMyObject::Init()
 		if (SUCCEEDED(hr))
 		{
 			hr = this->m_pImp_clsIDataSet->MyInit();
+		}
+		if (SUCCEEDED(hr))
+		{
+			hr = this->m_pImpISummaryInfo->MyInit();
 		}
 	}
 	else hr = E_OUTOFMEMORY;
@@ -2538,4 +2556,360 @@ STDMETHODIMP CMyObject::CImpIPersistStreamInit::Save(
 									BOOL			fClearDirty)
 {
 	return this->m_pBackObj->m_pMyOPTFile->SaveToStream(pStm, fClearDirty);
+}
+
+CMyObject::CImpIPersistFile::CImpIPersistFile(CMyObject * pBackObj, IUnknown * punkOuter) :
+	m_pBackObj(pBackObj),
+	m_punkOuter(punkOuter),
+	m_szFileName(NULL),
+	m_fNoScribble(FALSE)
+{
+
+}
+
+CMyObject::CImpIPersistFile::~CImpIPersistFile()
+{
+	if (NULL != this->m_szFileName)
+	{
+		CoTaskMemFree((LPVOID)this->m_szFileName);
+		this->m_szFileName = NULL;
+	}
+}
+// IUnknown methods
+STDMETHODIMP CMyObject::CImpIPersistFile::QueryInterface(
+	REFIID			riid,
+	LPVOID		*	ppv)
+{
+	return this->m_punkOuter->QueryInterface(riid, ppv);
+}
+
+STDMETHODIMP_(ULONG) CMyObject::CImpIPersistFile::AddRef()
+{
+	return this->m_punkOuter->AddRef();
+}
+
+STDMETHODIMP_(ULONG) CMyObject::CImpIPersistFile::Release()
+{
+	return this->m_punkOuter->Release();
+}
+
+// IPersist method
+STDMETHODIMP CMyObject::CImpIPersistFile::GetClassID(
+	CLSID		*	pClassID)
+{
+	*pClassID = MY_CLSID;
+	return S_OK;
+}
+
+// IPersistFile methods
+STDMETHODIMP CMyObject::CImpIPersistFile::GetCurFile(
+	LPOLESTR	*	ppszFileName)
+{
+	*ppszFileName = NULL;
+	if (NULL != this->m_szFileName)
+	{
+		SHStrDup(this->m_szFileName, ppszFileName);
+		return S_OK;
+	}
+	else
+	{
+		SHStrDup(L".opt", ppszFileName);
+		return S_FALSE;
+	}
+}
+
+STDMETHODIMP CMyObject::CImpIPersistFile::IsDirty()
+{
+	return this->m_pBackObj->m_pMyOPTFile->GetAmDirty() ? S_OK : S_FALSE;
+}
+
+STDMETHODIMP CMyObject::CImpIPersistFile::Load(
+	LPCOLESTR		pszFileName,
+	DWORD			dwMode)
+{
+	if (NULL != this->m_szFileName)
+	{
+		CoTaskMemFree((LPVOID)this->m_szFileName);
+		this->m_szFileName = NULL;
+	}
+	if (this->m_pBackObj->m_pMyOPTFile->LoadFromFile(pszFileName))
+	{
+		SHStrDup(pszFileName, &this->m_szFileName);
+		return S_OK;
+	}
+	else
+		return E_FAIL;
+}
+
+STDMETHODIMP CMyObject::CImpIPersistFile::Save(
+	LPCOLESTR		pszFileName,
+	BOOL			fRemember)
+{
+	if (NULL == pszFileName)
+	{
+		// save case
+		if (!this->m_fNoScribble && NULL != this->m_szFileName)
+		{
+			if (this->m_pBackObj->m_pMyOPTFile->SaveToFile(this->m_szFileName, TRUE))
+			{
+				this->m_fNoScribble = TRUE;
+				return S_OK;
+			}
+			else
+				return E_FAIL;
+		}
+		else return E_UNEXPECTED;
+	}
+	else
+	{
+		if (fRemember)
+		{
+			// save as case
+			if (NULL != this->m_szFileName)
+			{
+				CoTaskMemFree((LPVOID)this->m_szFileName);
+				this->m_szFileName = NULL;
+			}
+			if (this->m_pBackObj->m_pMyOPTFile->SaveToFile(pszFileName, TRUE))
+			{
+				SHStrDup(pszFileName, &this->m_szFileName);
+				this->m_fNoScribble = TRUE;
+				return S_OK;
+			}
+			else
+			{
+				return E_FAIL;
+			}
+		}
+		else
+		{
+			// save a copy as
+			return this->m_pBackObj->m_pMyOPTFile->SaveToFile(pszFileName, FALSE) ? S_OK : E_FAIL;
+		}
+	}
+}
+STDMETHODIMP CMyObject::CImpIPersistFile::SaveCompleted(
+	LPCOLESTR		pszFileName)
+{
+	this->m_fNoScribble = FALSE;
+	return S_OK;
+}
+
+CMyObject::CImpISummaryInfo::CImpISummaryInfo(CMyObject * pBackObj, IUnknown * punkOuter) :
+	m_pBackObj(pBackObj),
+	m_punkOuter(punkOuter),
+	m_pTypeInfo(NULL),
+	m_dispidComment(DISPID_UNKNOWN),
+	m_dispidXData(DISPID_UNKNOWN),
+	m_dispidYData(DISPID_UNKNOWN),
+	m_dispidAcquisitionDate(DISPID_UNKNOWN),
+	m_dispidXRange(DISPID_UNKNOWN),
+	m_dispidYRange(DISPID_UNKNOWN)
+{
+}
+
+CMyObject::CImpISummaryInfo::~CImpISummaryInfo()
+{
+	Utils_RELEASE_INTERFACE(this->m_pTypeInfo);
+}
+
+// IUnknown methods
+STDMETHODIMP CMyObject::CImpISummaryInfo::QueryInterface(
+	REFIID			riid,
+	LPVOID		*	ppv)
+{
+	return this->m_punkOuter->QueryInterface(riid, ppv);
+}
+
+STDMETHODIMP_(ULONG) CMyObject::CImpISummaryInfo::AddRef()
+{
+	return this->m_punkOuter->AddRef();
+}
+
+STDMETHODIMP_(ULONG) CMyObject::CImpISummaryInfo::Release()
+{
+	return this->m_punkOuter->Release();
+}
+// IDispatch methods
+STDMETHODIMP CMyObject::CImpISummaryInfo::GetTypeInfoCount(
+	PUINT			pctinfo)
+{
+	*pctinfo = 1;
+	return S_OK;
+}
+
+STDMETHODIMP CMyObject::CImpISummaryInfo::GetTypeInfo(
+	UINT			iTInfo,
+	LCID			lcid,
+	ITypeInfo	**	ppTInfo)
+{
+	if (NULL != this->m_pTypeInfo)
+	{
+		*ppTInfo = this->m_pTypeInfo;
+		this->m_pTypeInfo->AddRef();
+		return S_OK;
+	}
+	else
+	{
+		*ppTInfo = NULL;
+		return E_FAIL;
+	}
+}
+
+STDMETHODIMP CMyObject::CImpISummaryInfo::GetIDsOfNames(
+	REFIID			riid,
+	OLECHAR		**  rgszNames,
+	UINT			cNames,
+	LCID			lcid,
+	DISPID		*	rgDispId)
+{
+	HRESULT			hr;
+	ITypeInfo	*	pTypeInfo;
+	hr = this->GetTypeInfo(0, lcid, &pTypeInfo);
+	if (SUCCEEDED(hr))
+	{
+		hr = DispGetIDsOfNames(pTypeInfo, rgszNames, cNames, rgDispId);
+		pTypeInfo->Release();
+	}
+	return hr;
+}
+
+STDMETHODIMP CMyObject::CImpISummaryInfo::Invoke(
+	DISPID			dispIdMember,
+	REFIID			riid,
+	LCID			lcid,
+	WORD			wFlags,
+	DISPPARAMS	*	pDispParams,
+	VARIANT		*	pVarResult,
+	EXCEPINFO	*	pExcepInfo,
+	PUINT			puArgErr)
+{
+	if (dispIdMember == m_dispidComment)
+	{
+		if (0 != (wFlags & DISPATCH_PROPERTYGET))
+		{
+			return this->GetComment(pVarResult);
+		}
+	}
+	else if (dispIdMember == m_dispidXData)
+	{
+		if (0 != (wFlags & DISPATCH_PROPERTYGET))
+		{
+			return this->GetXData(pVarResult);
+		}
+	}
+	else if (dispIdMember == m_dispidYData)
+	{
+		if (0 != (wFlags & DISPATCH_PROPERTYGET))
+		{
+			return this->GetYData(pVarResult);
+		}
+	}
+	else if (dispIdMember == m_dispidAcquisitionDate)
+	{
+		if (0 != (wFlags & DISPATCH_PROPERTYGET))
+		{
+			return this->GetAcquisitionDate(pVarResult);
+		}
+	}
+	else if (dispIdMember == m_dispidXRange)
+	{
+		if (0 != (wFlags & DISPATCH_PROPERTYGET))
+		{
+			return this->GetXRange(pDispParams, pVarResult);
+		}
+	}
+	else if (dispIdMember == m_dispidYRange)
+	{
+		if (0 != (wFlags & DISPATCH_PROPERTYGET))
+		{
+			return this->GetYRange(pDispParams, pVarResult);
+		}
+	}
+	return DISP_E_MEMBERNOTFOUND;
+}
+
+HRESULT CMyObject::CImpISummaryInfo::MyInit()
+{
+	HRESULT				hr;
+	TYPEATTR		*	pTypeAttr;
+
+	hr = this->m_pBackObj->GetRefTypeInfo(TEXT("ISummaryInfo"), &(this->m_pTypeInfo));
+	if (SUCCEEDED(hr))
+	{
+		hr = this->m_pTypeInfo->GetTypeAttr(&pTypeAttr);
+		if (SUCCEEDED(hr))
+		{
+			this->m_pBackObj->m_iidISummayInfo = pTypeAttr->guid;
+			this->m_pTypeInfo->ReleaseTypeAttr(pTypeAttr);
+		}
+		Utils_GetMemid(this->m_pTypeInfo, L"Comment", &m_dispidComment);
+		Utils_GetMemid(this->m_pTypeInfo, L"XData", &m_dispidXData);
+		Utils_GetMemid(this->m_pTypeInfo, L"YData", &m_dispidYData);
+		Utils_GetMemid(this->m_pTypeInfo, L"AcquisitionDate", &m_dispidAcquisitionDate);
+		Utils_GetMemid(this->m_pTypeInfo, L"XRange", &m_dispidXRange);
+		Utils_GetMemid(this->m_pTypeInfo, L"YRange", &m_dispidYRange);
+	}
+	return hr;
+}
+
+HRESULT CMyObject::CImpISummaryInfo::GetComment(
+	VARIANT		*	pVarResult)
+{
+	if (NULL == pVarResult) return E_INVALIDARG;
+	TCHAR			szComment[MAX_PATH];
+	if (this->m_pBackObj->m_pMyOPTFile->GetComment(szComment, MAX_PATH))
+	{
+		InitVariantFromString(szComment, pVarResult);
+	}
+	return S_OK;
+}
+HRESULT CMyObject::CImpISummaryInfo::GetXData(
+	VARIANT		*	pVarResult)
+{
+	if (NULL == pVarResult) return E_INVALIDARG;
+	long			nData = 0;
+	double		*	pData = NULL;
+	if (this->m_pBackObj->m_pMyOPTFile->GetWavelengths(&nData, &pData))
+	{
+		InitVariantFromDoubleArray(pData, (ULONG)nData, pVarResult);
+		delete[] pData;
+	}
+	return S_OK;
+}
+HRESULT CMyObject::CImpISummaryInfo::GetYData(
+	VARIANT		*	pVarResult)
+{
+	if (NULL == pVarResult) return E_INVALIDARG;
+	long			nData = 0;
+	double		*	pData = NULL;
+	if (this->m_pBackObj->m_pMyOPTFile->GetSpectra(&nData, &pData))
+	{
+		InitVariantFromDoubleArray(pData, (ULONG)nData, pVarResult);
+		delete[] pData;
+	}
+	return S_OK;
+}
+HRESULT	CMyObject::CImpISummaryInfo::GetAcquisitionDate(
+	VARIANT		*	pVarResult)
+{
+	if (NULL == pVarResult) return E_INVALIDARG;
+
+	return S_OK;
+}
+HRESULT CMyObject::CImpISummaryInfo::GetXRange(
+	DISPPARAMS	*	pDispParams,
+	VARIANT		*	pVarResult)
+{
+	if (NULL == pVarResult) return E_INVALIDARG;
+
+	return S_OK;
+}
+HRESULT CMyObject::CImpISummaryInfo::GetYRange(
+	DISPPARAMS	*	pDispParams,
+	VARIANT		*	pVarResult)
+{
+	if (NULL == pVarResult) return E_INVALIDARG;
+
+	return S_OK;
 }
