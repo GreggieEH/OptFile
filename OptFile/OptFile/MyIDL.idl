@@ -129,6 +129,9 @@ library OPTFile
 							[out]		SAFEARRAY(double)*	extraValues);
 		[id(DISPID_SetTimeStamp), helpstring("Set current time stamp")]
 		void			SetTimeStamp();
+		[id(DISPID_GetADGainFactor), helpstring("Get the AD data gain factor")]
+		double			GetADGainFactor(
+							[in]		double			wavelength);
 	}
 	[
 		uuid(51AC4DB2-3762-401f-8858-2E3321557636),

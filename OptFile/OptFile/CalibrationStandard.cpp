@@ -191,3 +191,12 @@ BOOL CCalibrationStandard::VariantToDoubleArray(
 	SafeArrayUnaccessData(Value->parray);
 	return TRUE;
 }
+
+double CCalibrationStandard::GetexpectedDistance()
+{
+	return this->getDoubleProperty(L"expectedDistance");
+}
+double CCalibrationStandard::GetsourceDistance()
+{
+	return this->getDoubleProperty(L"sourceDistance");
+}

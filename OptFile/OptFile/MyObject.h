@@ -187,6 +187,9 @@ private:
 									VARIANT		*	pVarResult);
 		HRESULT					SetSignalUnits(
 									DISPPARAMS	*	pDispParams);
+		HRESULT					GetADGainFactor(
+									DISPPARAMS	*	pDispParams,
+									VARIANT		*	pVarResult);
 	private:
 		CMyObject			*	m_pBackObj;
 		IUnknown			*	m_punkOuter;

@@ -712,6 +712,10 @@ STDMETHODIMP CMyObject::CImpIDispatch::Invoke(
 		else if (0 != (wFlags & DISPATCH_PROPERTYPUT))
 			return this->SetSignalUnits(pDispParams);
 		break;
+	case DISPID_GetADGainFactor:
+		if (0 != (wFlags & DISPATCH_METHOD))
+			return this->GetADGainFactor(pDispParams, pVarResult);
+		break;
 	default:
 		break;
 	}
@@ -1412,6 +1416,28 @@ HRESULT CMyObject::CImpIDispatch::SetSignalUnits(
 	Utils_OnPropChanged(this->m_pBackObj, DISPID_SignalUnits);
 	return S_OK;
 }
+
+HRESULT CMyObject::CImpIDispatch::GetADGainFactor(
+	DISPPARAMS	*	pDispParams,
+	VARIANT		*	pVarResult)
+{
+	// input wavelength
+	VARIANTARG		varg;
+	UINT			uArgErr;
+	double			wavelength;
+	HRESULT			hr;
+	VariantInit(&varg);
+	hr = DispGetParam(pDispParams, 0, VT_R8, &varg, &uArgErr);
+	if (FAILED(hr)) return hr;
+	wavelength = varg.dblVal;
+
+	if (NULL == pVarResult) return E_INVALIDARG;
+	InitVariantFromDouble(
+		this->m_pBackObj->m_pMyOPTFile->DetermineDataGainFactor(wavelength),
+		pVarResult);
+	return S_OK;
+}
+
 
 
 CMyObject::CImpIProvideClassInfo2::CImpIProvideClassInfo2(CMyObject * pBackObj, IUnknown * punkOuter) :

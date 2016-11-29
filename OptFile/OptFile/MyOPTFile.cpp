@@ -282,7 +282,7 @@ BOOL CMyOPTFile::LoadFromString(
 					this->SetDefaultTitle(L"Voltage");
 					this->SetSignalUnits(L"V");
 				}
-				this->m_pInputInfo = new CScriptDispatch(L"InputInfo.jvs");
+				this->m_pInputInfo = new CScriptDispatch(L"InputInfo.jvs.txt");
 				if (this->m_pInputInfo->GetScript(&pdisp))
 				{
 					inputInfo.doInit(pdisp);
@@ -541,7 +541,7 @@ BOOL CMyOPTFile::InitNew()
 	if (this->GetAmLoaded()) return FALSE;
 	this->m_pDetectorInfo	= new CDetectorInfo;
 	this->m_pDetectorInfo->InitNew();
-	this->m_pInputInfo = new CScriptDispatch(L"InputInfo.jvs");
+	this->m_pInputInfo = new CScriptDispatch(L"InputInfo.jvs.txt");
 	IDispatch	*	pdisp;
 	if (this->m_pInputInfo->GetScript(&pdisp))
 	{
@@ -838,20 +838,20 @@ BOOL CMyOPTFile::Setup(
 		{
 			if (this->m_fCalibrationMeasurement)
 			{
-				nPages = 3;
+				nPages = 4;
 				aPages = new HPROPSHEETPAGE[nPages];
 				aPages[0] = propPageInput.doCreatePropPage();
 				aPages[1] = propPageDetector.doCreatePropPage();
-		//		aPages[2] = propPageSlitInfo.doCreatePropPage();			// don't display slit info if no data
+				aPages[2] = propPageSlitInfo.doCreatePropPage();			// don't display slit info if no data
 				aPages[2] = propPageCalStandard.doCreatePropPage();
 			}
 			else
 			{
-				nPages = 2;
+				nPages = 3;
 				aPages = new HPROPSHEETPAGE[nPages];
 				aPages[0] = propPageInput.doCreatePropPage();
 				aPages[1] = propPageDetector.doCreatePropPage();
-		//		aPages[2] = propPageSlitInfo.doCreatePropPage();			// don't display slit info if no data
+				aPages[2] = propPageSlitInfo.doCreatePropPage();			// don't display slit info if no data
 			}
 		}
 	}
@@ -2229,6 +2229,7 @@ double CMyOPTFile::GetLampDistanceFactor()
 {
 	if (this->GetCalibrationMeasurement())
 	{	
+/*
 		double			lampDistance = 1.0;
 		IDispatch	*	pdisp;
 
@@ -2243,6 +2244,11 @@ double CMyOPTFile::GetLampDistanceFactor()
 //		double			lampDistance = this->m_pInputInfo->GetlampDistance();
 		if (lampDistance < 1.0) lampDistance = 1.0;
 		return (50.0 * 50.0) / (lampDistance * lampDistance);
+		*/
+		double expectedDistance = this->m_pCalibrationStandard->GetexpectedDistance();
+		double sourceDistance = this->m_pCalibrationStandard->GetsourceDistance();
+		if (sourceDistance < 1.0) sourceDistance = 1.0;
+		return (expectedDistance * expectedDistance) / (sourceDistance * sourceDistance);
 	}
 	else
 	{

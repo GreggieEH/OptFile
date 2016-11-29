@@ -29,6 +29,8 @@ public:
 						LPCTSTR			szFileName);
 	BOOL			checkExcelFile(
 						LPCTSTR			szFileName);
+	double			GetexpectedDistance();
+	double			GetsourceDistance();
 protected:
 	BOOL			VariantToDoubleArray(
 						VARIANT			*	Value,

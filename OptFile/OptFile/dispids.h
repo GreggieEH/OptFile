@@ -48,6 +48,7 @@
 #define				DISPID_WriteINI				0x0137
 #define				DISPID_GetExtraValues		0x0138
 #define				DISPID_SetTimeStamp			0x0139
+#define				DISPID_GetADGainFactor		0x013a
 
 // events
 #define				DISPID_RequestSlitWidth		0x0140
