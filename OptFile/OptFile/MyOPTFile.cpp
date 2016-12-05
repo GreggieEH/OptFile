@@ -1074,6 +1074,11 @@ void CMyOPTFile::SetCurrentExp(
 	BOOL			fDone	= FALSE;
 	long			iScan	= 0;
 	TCHAR			szNodeName[MAX_PATH];
+
+//	TCHAR			szMessage[MAX_PATH];
+//	StringCchPrintf(szMessage, MAX_PATH, L"SetCurrentExp for filter %s grating %1d detector %1d", filter, grating, detector);
+//	MessageBox(NULL, szMessage, L"SetCurrentExp", MB_OK);
+
 	while (iScan < this->m_nScans && !fDone)
 	{
 		fDone = this->m_ppScans[iScan]->CheckGratingAndFilter(
@@ -1086,6 +1091,7 @@ void CMyOPTFile::SetCurrentExp(
 	}
 	if (!fDone)
 	{
+
 		// need to add a scan
 		long				nScans	= this->m_nScans + 1;
 		CGratingScanInfo**	ppScans	= new CGratingScanInfo* [nScans];
@@ -1106,6 +1112,9 @@ void CMyOPTFile::SetCurrentExp(
 		this->m_ppScans	= ppScans;
 		this->m_nScans	= nScans;
 		this->m_nActiveScan	= iScan;
+
+//		StringCchPrintf(szMessage, MAX_PATH, L"Added scan for filter %s grating %1d detector %1d", filter, grating, detector);
+//		MessageBox(NULL, szMessage, L"OptFile", MB_OK);
 	}
 }
 

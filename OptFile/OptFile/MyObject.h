@@ -190,6 +190,12 @@ private:
 		HRESULT					GetADGainFactor(
 									DISPPARAMS	*	pDispParams,
 									VARIANT		*	pVarResult);
+		HRESULT					RecallSettings(
+									DISPPARAMS	*	pDispParams,
+									VARIANT		*	pVarResult);
+		HRESULT					SaveSettings(
+									DISPPARAMS	*	pDispParams,
+									VARIANT		*	pVarResult);
 	private:
 		CMyObject			*	m_pBackObj;
 		IUnknown			*	m_punkOuter;

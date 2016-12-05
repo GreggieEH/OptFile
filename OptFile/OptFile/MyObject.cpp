@@ -1438,6 +1438,51 @@ HRESULT CMyObject::CImpIDispatch::GetADGainFactor(
 	return S_OK;
 }
 
+HRESULT CMyObject::CImpIDispatch::RecallSettings(
+	DISPPARAMS	*	pDispParams,
+	VARIANT		*	pVarResult)
+{
+	HRESULT				hr;
+	VARIANTARG			varg;
+	UINT				uArgErr;
+	BOOL				fSuccess = FALSE;
+	TCHAR				szFilePath[MAX_PATH];
+	VariantInit(&varg);
+	hr = DispGetParam(pDispParams, 0, VT_BSTR, &varg, &uArgErr);
+	if (FAILED(hr)) return hr;
+	// form recall file name
+	StringCchCopy(szFilePath, MAX_PATH, varg.bstrVal);
+	PathAppend(szFilePath, L"OptFile.xml");
+	if (PathFileExists(szFilePath))
+	{
+		fSuccess = this->m_pBackObj->m_pMyOPTFile->LoadFromFile(szFilePath);
+	}
+	VariantClear(&varg);
+	if (NULL != pVarResult) InitVariantFromBoolean(fSuccess, pVarResult);
+	return S_OK;
+}
+
+HRESULT CMyObject::CImpIDispatch::SaveSettings(
+	DISPPARAMS	*	pDispParams,
+	VARIANT		*	pVarResult)
+{
+	HRESULT				hr;
+	VARIANTARG			varg;
+	UINT				uArgErr;
+	BOOL				fSuccess = FALSE;
+	TCHAR				szFilePath[MAX_PATH];
+	VariantInit(&varg);
+	hr = DispGetParam(pDispParams, 0, VT_BSTR, &varg, &uArgErr);
+	if (FAILED(hr)) return hr;
+	// form save file name
+	StringCchCopy(szFilePath, MAX_PATH, varg.bstrVal);
+	PathAppend(szFilePath, L"OptFile.xml");
+	fSuccess = this->m_pBackObj->m_pMyOPTFile->SaveToFile(szFilePath, TRUE);
+	VariantClear(&varg);
+	if (NULL != pVarResult) InitVariantFromBoolean(fSuccess, pVarResult);
+	return S_OK;
+
+}
 
 
 CMyObject::CImpIProvideClassInfo2::CImpIProvideClassInfo2(CMyObject * pBackObj, IUnknown * punkOuter) :

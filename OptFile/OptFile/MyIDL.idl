@@ -132,6 +132,12 @@ library OPTFile
 		[id(DISPID_GetADGainFactor), helpstring("Get the AD data gain factor")]
 		double			GetADGainFactor(
 							[in]		double			wavelength);
+		[id(DISPID_RecallSettings), helpstring("Recall the settings")]
+		VARIANT_BOOL	RecallSettings(
+							[in]		BSTR			workingFolder);
+		[id(DISPID_SaveSettings), helpstring("Save settings")]
+		VARIANT_BOOL	SaveSettings(
+							[in]		BSTR			workingFolder);
 	}
 	[
 		uuid(51AC4DB2-3762-401f-8858-2E3321557636),

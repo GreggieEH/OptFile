@@ -49,6 +49,8 @@
 #define				DISPID_GetExtraValues		0x0138
 #define				DISPID_SetTimeStamp			0x0139
 #define				DISPID_GetADGainFactor		0x013a
+#define				DISPID_RecallSettings		0x013b
+#define				DISPID_SaveSettings			0x013c
 
 // events
 #define				DISPID_RequestSlitWidth		0x0140
