@@ -29,7 +29,8 @@ public:
 						UINT			nBufferSize);
 	void			SetgainSetting(
 						LPCTSTR			szgainSetting);
-	double			Gettemperature();
+	BOOL			Gettemperature(
+						double		*	temperature);
 	void			Settemperature(
 						double			temperature);
 	BOOL			GetamDirty();

@@ -330,4 +330,7 @@ private:
 	TCHAR				m_szSignalUnits[MAX_PATH];
 	// default title
 	TCHAR				m_szDefaultTitle[MAX_PATH];
+	// total run time
+	BOOL				m_fHaveTotalRunTime;
+	TCHAR				m_szTotalRunTime[MAX_PATH];
 };

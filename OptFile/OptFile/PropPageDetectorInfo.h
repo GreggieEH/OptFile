@@ -82,6 +82,7 @@ protected:
 	void			InitGainSetting();
 	void			DisplayGainSetting();
 	void			SetGainSetting();
+	void			DisplayTemperature();
 private:
 	class CSingleDetector
 	{

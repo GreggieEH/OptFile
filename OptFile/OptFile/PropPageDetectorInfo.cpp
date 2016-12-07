@@ -62,8 +62,9 @@ BOOL CPropPageDetectorInfo::OnInitDialog()
 			SetDlgItemText(this->GetMyPage(), IDC_GAINSETTING, szgain);
 		if (detInfo.GetportName(szString, MAX_PATH))
 			SetDlgItemText(this->GetMyPage(), IDC_EDITPORTNAME, szString);
-		_stprintf_s(szString, MAX_PATH, TEXT("%5.1f"), detInfo.Gettemperature());
-		SetDlgItemText(this->GetMyPage(), IDC_TEMPERATURE, szString);
+		this->DisplayTemperature();
+//		_stprintf_s(szString, MAX_PATH, TEXT("%5.1f"), detInfo.Gettemperature());
+//		SetDlgItemText(this->GetMyPage(), IDC_TEMPERATURE, szString);
 		nChannels = detInfo.GetnumADChannels();
 		SetDlgItemInt(this->GetMyPage(), IDC_NUMBERCHANNELSETTINGS, nChannels, FALSE);
 		EnableWindow(GetDlgItem(this->GetMyPage(), IDC_UPDCHANNELDISPLAY), nChannels > 1);
@@ -215,10 +216,11 @@ void CPropPageDetectorInfo::OnKillFocusTemperature()
 				detInfo.Settemperature(fval);
 			}
 		}
-		_stprintf_s(szString, MAX_PATH, TEXT("%5.1f"), (float) detInfo.Gettemperature());
-		SetDlgItemText(this->GetMyPage(), IDC_TEMPERATURE, szString);
+//		_stprintf_s(szString, MAX_PATH, TEXT("%5.1f"), (float) detInfo.Gettemperature());
+//		SetDlgItemText(this->GetMyPage(), IDC_TEMPERATURE, szString);
 		pdisp->Release();
 	}
+	this->DisplayTemperature();
 }
 
 BOOL CPropPageDetectorInfo::GetConfigFile(
@@ -1179,4 +1181,26 @@ void CPropPageDetectorInfo::SetGainSetting()
 		}
 	}
 	this->DisplayGainSetting();
+}
+
+void CPropPageDetectorInfo::DisplayTemperature()
+{
+	IDispatch	*	pdisp;
+	CDetectorInfo	detInfo;
+	double			temperature;
+	TCHAR			szString[MAX_PATH];
+	if (this->GetDetectorInfo(&pdisp))
+	{
+		detInfo.doInit(pdisp);
+		if (detInfo.Gettemperature(&temperature))
+		{
+			_stprintf_s(szString, L"%5.1f", temperature);
+			SetDlgItemText(this->GetMyPage(), IDC_TEMPERATURE, szString);
+		}
+		else
+		{
+			SetDlgItemText(this->GetMyPage(), IDC_TEMPERATURE, L"Not Set");
+		}
+		pdisp->Release();
+	}
 }

@@ -45,7 +45,9 @@ CMyOPTFile::CMyOPTFile(CMyObject * pMyObject) :
 	// value to add to the raw data to ensure positive values for optical transfer function calculation
 	m_addValue(0.0),
 	// flag allow negative values
-	m_AllowNegativeValues(FALSE)
+	m_AllowNegativeValues(FALSE),
+	// total run time
+	m_fHaveTotalRunTime(FALSE)
 {
 	// time stamp
 	this->m_szTimeStamp[0]	= '\0';
@@ -59,6 +61,7 @@ CMyOPTFile::CMyOPTFile(CMyObject * pMyObject) :
 	this->m_szExtraValue[0] = '\0';
 	this->SetSignalUnits(L"V");
 	this->SetDefaultTitle(L"Voltage");
+	this->m_szTotalRunTime[0] = '\0';
 }
 
 CMyOPTFile::~CMyOPTFile(void)
@@ -120,6 +123,53 @@ BOOL CMyOPTFile::LoadFromFile()
 
 BOOL CMyOPTFile::SaveToFile()
 {
+	// check if total run time is available
+	HRESULT			hr;
+	CLSID			clsid;
+	IUnknown	*	pUnk;
+	IDispatch	*	pdisp;
+	DISPID			dispid;
+	long			totalRunTime;
+	long			hours;
+	long			minutes;
+	long			seconds;
+
+	hr = CLSIDFromProgID(L"Sciencetech.ScanTimer.1", &clsid);
+	if (SUCCEEDED(hr))
+	{
+		hr = GetActiveObject(clsid, NULL, &pUnk);
+		if (SUCCEEDED(hr))
+		{
+			hr = pUnk->QueryInterface(IID_IDispatch, (LPVOID*)&pdisp);
+			if (SUCCEEDED(hr))
+			{
+				Utils_GetMemid(pdisp, L"TotalScanTime", &dispid);
+				totalRunTime = Utils_GetLongProperty(pdisp, dispid);
+				if (totalRunTime > 0 && totalRunTime < 1000000)
+				{
+					this->m_fHaveTotalRunTime = TRUE;
+					if (totalRunTime > 3600)
+					{
+						hours = totalRunTime / 3600;
+						minutes = (totalRunTime % 3600) / 60;
+						StringCchPrintf(this->m_szTotalRunTime, MAX_PATH, L"%1d Hours %1d Minutes", hours, minutes);
+					}
+					else
+					{
+						minutes = totalRunTime / 60;
+						seconds = totalRunTime % 60;
+						StringCchPrintf(this->m_szTotalRunTime, MAX_PATH, L"%1d minutes %1d seconds", minutes, seconds);
+					}
+				}
+
+
+				pdisp->Release();
+			}
+			pUnk->Release();
+		}
+	}
+
+
 	return this->SaveToFile(this->m_szFilePath, TRUE);
 }
 
@@ -470,6 +520,15 @@ BOOL CMyOPTFile::SaveToString(
 					xml.setNodeValue(pdispDefaultTitle, szDefaultTitle);
 					xml.appendChildNode(pdispRoot, pdispDefaultTitle);
 					pdispDefaultTitle->Release();
+				}
+				if (this->m_fHaveTotalRunTime)
+				{
+					if (xml.createNode(L"TotalRunTime", &pdisp))
+					{
+						xml.setNodeValue(pdisp, this->m_szTotalRunTime);
+						xml.appendChildNode(pdispRoot, pdisp);
+						pdisp->Release();
+					}
 				}
 				pdispRoot->Release();
 			}

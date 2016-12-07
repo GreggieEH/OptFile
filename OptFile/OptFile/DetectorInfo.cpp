@@ -99,10 +99,32 @@ void CDetectorInfo::SetgainSetting(
 	this->setStringProperty(TEXT("gainSetting"), szgainSetting);
 }
 
-double CDetectorInfo::Gettemperature()
+//double CDetectorInfo::Gettemperature()
+//{
+//	return this->getDoubleProperty(TEXT("temperature"));
+//}
+
+BOOL CDetectorInfo::Gettemperature(
+	double		*	temperature)
 {
-	return this->getDoubleProperty(TEXT("temperature"));
+	HRESULT			hr;
+	VARIANT			Value;
+	BOOL			fSuccess = FALSE;
+	*temperature = 0.0;
+	this->getProperty(L"temperature", &Value);
+	if (VT_BSTR == Value.vt)
+	{
+		VariantClear(&Value);
+		return FALSE;
+	}
+	else
+	{
+		hr = VariantToDouble(Value, temperature);
+		fSuccess = SUCCEEDED(hr);
+	}
+	return fSuccess;
 }
+
 
 void CDetectorInfo::Settemperature(
 						double			temperature)

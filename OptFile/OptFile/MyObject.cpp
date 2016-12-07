@@ -606,6 +606,10 @@ STDMETHODIMP CMyObject::CImpIDispatch::Invoke(
 		if (0 != (wFlags & DISPATCH_METHOD))
 			return this->ReadConfig(pDispParams, pVarResult);
 		break;
+	case DISPID_ReadINI:
+		if (0 != (wFlags & DISPATCH_METHOD))
+			return this->ReadINI(pDispParams);
+		break;
 	case DISPID_SetExp:
 		if (0 != (wFlags & DISPATCH_METHOD))
 			return this->SetExp(pDispParams);
@@ -715,6 +719,14 @@ STDMETHODIMP CMyObject::CImpIDispatch::Invoke(
 	case DISPID_GetADGainFactor:
 		if (0 != (wFlags & DISPATCH_METHOD))
 			return this->GetADGainFactor(pDispParams, pVarResult);
+		break;
+	case DISPID_RecallSettings:
+		if (0 != (wFlags & DISPATCH_METHOD))
+			return this->RecallSettings(pDispParams, pVarResult);
+		break;
+	case DISPID_SaveSettings:
+		if (0 != (wFlags & DISPATCH_METHOD))
+			return this->SaveSettings(pDispParams, pVarResult);
 		break;
 	default:
 		break;
@@ -910,17 +922,40 @@ HRESULT CMyObject::CImpIDispatch::ReadConfig(
 HRESULT CMyObject::CImpIDispatch::ReadINI(
 	DISPPARAMS	*	 pDispParams)
 {
-
+	HRESULT				hr;
+	VARIANTARG			varg;
+	UINT				uArgErr;
+	TCHAR				szFolder[MAX_PATH];
+	VariantInit(&varg);
+	hr = DispGetParam(pDispParams, 0, VT_BSTR, &varg, &uArgErr);
+	if (FAILED(hr)) return hr;
+	StringCchCopy(szFolder, MAX_PATH, varg.bstrVal);
+	VariantClear(&varg);
+	PathRemoveFileSpec(szFolder);
+	InitVariantFromString(szFolder, &varg);
+	Utils_InvokeMethod(this, DISPID_RecallSettings, &varg, 1, NULL);
+	VariantClear(&varg);
 	return S_OK;
 }
 
 HRESULT CMyObject::CImpIDispatch::WriteINI(
 	DISPPARAMS	*	pDispParams)
 {
-
+	HRESULT				hr;
+	VARIANTARG			varg;
+	UINT				uArgErr;
+	TCHAR				szFolder[MAX_PATH];
+	VariantInit(&varg);
+	hr = DispGetParam(pDispParams, 0, VT_BSTR, &varg, &uArgErr);
+	if (FAILED(hr)) return hr;
+	StringCchCopy(szFolder, MAX_PATH, varg.bstrVal);
+	VariantClear(&varg);
+	PathRemoveFileSpec(szFolder);
+	InitVariantFromString(szFolder, &varg);
+	Utils_InvokeMethod(this, DISPID_SaveSettings, &varg, 1, NULL);
+	VariantClear(&varg);
 	return S_OK;
 }
-
 
 HRESULT CMyObject::CImpIDispatch::SetExp(
 									DISPPARAMS	*	pDispParams)
@@ -1481,9 +1516,7 @@ HRESULT CMyObject::CImpIDispatch::SaveSettings(
 	VariantClear(&varg);
 	if (NULL != pVarResult) InitVariantFromBoolean(fSuccess, pVarResult);
 	return S_OK;
-
 }
-
 
 CMyObject::CImpIProvideClassInfo2::CImpIProvideClassInfo2(CMyObject * pBackObj, IUnknown * punkOuter) :
 	m_pBackObj(pBackObj),
