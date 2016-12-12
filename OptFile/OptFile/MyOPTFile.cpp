@@ -221,7 +221,7 @@ BOOL CMyOPTFile::LoadFromFile(
 		if (0 == lstrcmpi(PathFindExtension(szFileName), L".otd"))
 		{
 			this->SetDefaultTitle(L"Optical Transfer Data");
-			this->SetSignalUnits(L"V/nm/(cm^2)");
+			this->SetSignalUnits(L"V/Watts/(cm^2)");
 		}
 		else
 		{
