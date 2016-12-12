@@ -221,10 +221,12 @@ BOOL CMyOPTFile::LoadFromFile(
 		if (0 == lstrcmpi(PathFindExtension(szFileName), L".otd"))
 		{
 			this->SetDefaultTitle(L"Optical Transfer Data");
+			this->SetSignalUnits(L"V/nm/(cm^2)");
 		}
 		else
 		{
 			this->SetDefaultTitle(L"Voltage");
+			this->SetSignalUnits(L"V");
 		}
 	}
 	return fSuccess;
@@ -1768,8 +1770,7 @@ BOOL CMyOPTFile::FormOpticalTransfer()
 			if (0.0 == bandPass) bandPass = 1.0;
 			DCSignalOffset = this->DetermineDCSignalOffset(pWaves[nData / 2]);
 			// apply the reference calibration
-			if (this->GetNMReferenceCalibration(
-				pWaves[0], pWaves[nData - 1], &nCal, &pWavesCal, &pCalibration))
+			if (this->GetNMReferenceCalibration(pWaves[0], pWaves[nData - 1], &nCal, &pWavesCal, &pCalibration))
 			{
 				if (nCal == nData)
 				{
