@@ -1602,7 +1602,6 @@ BOOL CMyOPTFile::GetNMReferenceCalibration(
 	long				c;
 	double				deltaX;
 //	// lamp distance factor
-	//double				lampDistanceFactor = this->GetLampDistanceFactor();
 	*nValues	= 0;
 	*ppWaves	= NULL;
 	*ppCal		= NULL;
@@ -1638,7 +1637,6 @@ BOOL CMyOPTFile::GetNMReferenceCalibration(
 	}
 	if (fSuccess)
 	{
-//		*nValues	= (long) floor(endWave) - (long) floor(startWave) + 1;
 		*nValues = (((long)floor(endWave + 0.5) - (long)floor(startWave + 0.5)) * 10) + 1;
 		*ppWaves	= new double [*nValues];
 		*ppCal		= new double [*nValues];
@@ -1647,8 +1645,7 @@ BOOL CMyOPTFile::GetNMReferenceCalibration(
 		intValues.SetYArray(tN, tY);
 		for (i=0; i<(*nValues); i++)
 		{
-//			(*ppWaves)[i]	= floor(startWave) + (i * 1.0);
-			(*ppWaves)[i]	= floor(startWave) + (i * 0.1);
+			(*ppWaves)[i]	= floor(startWave) + (i * 0.01);
 			(*ppCal)[i]		= intValues.interpolateValue((*ppWaves)[i]);
 		}
 		fSuccess	= TRUE;

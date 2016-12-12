@@ -2998,7 +2998,13 @@ HRESULT	CMyObject::CImpISummaryInfo::GetAcquisitionDate(
 	VARIANT		*	pVarResult)
 {
 	if (NULL == pVarResult) return E_INVALIDARG;
-
+	TCHAR			szTimeStamp[MAX_PATH];
+	if (this->m_pBackObj->m_pMyOPTFile->GetTimeStamp(szTimeStamp, MAX_PATH))
+	{
+		VariantInit(pVarResult);
+		pVarResult->vt = VT_DATE;
+		VarDateFromStr(szTimeStamp, LOCALE_USER_DEFAULT, LOCALE_NOUSEROVERRIDE, &pVarResult->date);
+	}
 	return S_OK;
 }
 HRESULT CMyObject::CImpISummaryInfo::GetXRange(
@@ -3006,7 +3012,25 @@ HRESULT CMyObject::CImpISummaryInfo::GetXRange(
 	VARIANT		*	pVarResult)
 {
 	if (NULL == pVarResult) return E_INVALIDARG;
-
+	if (1 != pDispParams->cArgs) return DISP_E_BADPARAMCOUNT;
+	if ((VT_BYREF | VT_R8) != pDispParams->rgvarg[0].vt) return DISP_E_TYPEMISMATCH;
+	long			nData = 0;
+	double		*	pData = NULL;
+	double			xRange[2];
+	long			i;
+	if (this->m_pBackObj->m_pMyOPTFile->GetWavelengths(&nData, &pData))
+	{
+		xRange[0] = pData[0];
+		xRange[1] = pData[1];
+		for (i = 1; i < nData; i++)
+		{
+			xRange[0] = xRange[0] < pData[i] ? xRange[0] : pData[i];
+			xRange[1] = xRange[1] >= pData[i] ? xRange[1] : pData[i];
+		}
+		delete[] pData;
+		*(pDispParams->rgvarg[0].pdblVal) = xRange[0];
+		InitVariantFromDouble(xRange[1], pVarResult);
+	}
 	return S_OK;
 }
 HRESULT CMyObject::CImpISummaryInfo::GetYRange(
@@ -3014,6 +3038,25 @@ HRESULT CMyObject::CImpISummaryInfo::GetYRange(
 	VARIANT		*	pVarResult)
 {
 	if (NULL == pVarResult) return E_INVALIDARG;
+	if (1 != pDispParams->cArgs) return DISP_E_BADPARAMCOUNT;
+	if ((VT_BYREF | VT_R8) != pDispParams->rgvarg[0].vt) return DISP_E_TYPEMISMATCH;
+	long			nData = 0;
+	double		*	pData = NULL;
+	double			yRange[2];
+	long			i;
+	if (this->m_pBackObj->m_pMyOPTFile->GetSpectra(&nData, &pData))
+	{
+		yRange[0] = pData[0];
+		yRange[1] = pData[1];
+		for (i = 1; i < nData; i++)
+		{
+			yRange[0] = yRange[0] < pData[i] ? yRange[0] : pData[i];
+			yRange[1] = yRange[1] >= pData[i] ? yRange[1] : pData[i];
+		}
+		delete[] pData;
+		*(pDispParams->rgvarg[0].pdblVal) = yRange[0];
+		InitVariantFromDouble(yRange[1], pVarResult);
+	}
 
 	return S_OK;
 }

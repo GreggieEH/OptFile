@@ -66,3 +66,8 @@ HWND GetApplicationWindow();
 
 // file open displayed curve
 #define				OUR_CURVE					L"OPTCurve"
+
+// list of file extensions
+#define				OPT_FILE_EXT				L".opt"
+#define				CAL_FILE_EXT				L".cal"
+#define				OTD_FILE_EXT				L".otd"
