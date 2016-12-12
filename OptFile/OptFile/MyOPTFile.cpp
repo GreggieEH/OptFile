@@ -226,7 +226,7 @@ BOOL CMyOPTFile::LoadFromFile(
 		else
 		{
 			this->SetDefaultTitle(L"Voltage");
-			this->SetSignalUnits(L"V");
+	//		this->SetSignalUnits(L"V");
 		}
 	}
 	return fSuccess;
