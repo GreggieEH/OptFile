@@ -196,6 +196,9 @@ private:
 		HRESULT					SaveSettings(
 									DISPPARAMS	*	pDispParams,
 									VARIANT		*	pVarResult);
+		HRESULT					GetNMReferenceCalibration(
+									DISPPARAMS	*	pDispParams,
+									VARIANT		*	pVarResult);
 	private:
 		CMyObject			*	m_pBackObj;
 		IUnknown			*	m_punkOuter;

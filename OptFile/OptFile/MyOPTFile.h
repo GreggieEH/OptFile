@@ -226,6 +226,12 @@ public:
 	// determine the DC signal offset
 	double				DetermineDCSignalOffset(
 							double			wavelength);
+	BOOL				GetNMReferenceCalibration(
+							double			startWave,
+							double			endWave,
+							long		*	nValues,
+							double		**	ppWaves,
+							double		**	ppCal);
 protected:
 	BOOL				GetNMScanData(
 							long		*	nValues,
@@ -235,12 +241,6 @@ protected:
 							long		*	nValues,
 							double		**	ppWaves,
 							double		**	ppSignal);
-	BOOL				GetNMReferenceCalibration(
-							double			startWave,
-							double			endWave,
-							long		*	nValues,
-							double		**	ppWaves,
-							double		**	ppCal);
 	BOOL				FormOpticalTransfer();
 	BOOL				GetRefCalibration(
 							long		*	nValues,

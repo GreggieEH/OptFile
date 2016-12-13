@@ -728,6 +728,10 @@ STDMETHODIMP CMyObject::CImpIDispatch::Invoke(
 		if (0 != (wFlags & DISPATCH_METHOD))
 			return this->SaveSettings(pDispParams, pVarResult);
 		break;
+	case DISPID_GetNMReferenceCalibration:
+		if (0 != (wFlags & DISPATCH_METHOD))
+			return this->GetNMReferenceCalibration(pDispParams, pVarResult);
+		break;
 	default:
 		break;
 	}
@@ -1515,6 +1519,47 @@ HRESULT CMyObject::CImpIDispatch::SaveSettings(
 	fSuccess = this->m_pBackObj->m_pMyOPTFile->SaveToFile(szFilePath, TRUE);
 	VariantClear(&varg);
 	if (NULL != pVarResult) InitVariantFromBoolean(fSuccess, pVarResult);
+	return S_OK;
+}
+
+HRESULT CMyObject::CImpIDispatch::GetNMReferenceCalibration(
+	DISPPARAMS	*	pDispParams,
+	VARIANT		*	pVarResult)
+{
+	HRESULT			hr;
+	VARIANTARG		varg;
+	UINT			uArgErr;
+	double			xRange[2];
+	long			nValues;
+	double		*	pWaves;
+	double		*	pCal;
+	SAFEARRAYBOUND	sab;
+	double		*	arr;
+	long			i;
+
+	if (NULL == pVarResult) return E_INVALIDARG;
+	if (3 != pDispParams->cArgs) return DISP_E_BADPARAMCOUNT;
+	if ((VT_BYREF | VT_ARRAY | VT_R8) != pDispParams->rgvarg[0].vt) return DISP_E_TYPEMISMATCH;
+	VariantInit(&varg);
+	hr = DispGetParam(pDispParams, 0, VT_R8, &varg, &uArgErr);
+	if (FAILED(hr)) return hr;
+	xRange[0] = varg.dblVal;
+	hr = DispGetParam(pDispParams, 1, VT_R8, &varg, &uArgErr);
+	if (FAILED(hr)) return hr;
+	xRange[1] = varg.dblVal;
+	if (this->m_pBackObj->m_pMyOPTFile->GetNMReferenceCalibration(xRange[0], xRange[1], &nValues, &pWaves, &pCal))
+	{
+		sab.lLbound = 0;
+		sab.cElements = nValues;
+		*(pDispParams->rgvarg[0].pparray) = SafeArrayCreate(VT_R8, 1, &sab);
+		SafeArrayAccessData(*(pDispParams->rgvarg[0].pparray), (void**)&arr);
+		for (i = 0; i < nValues; i++)
+			arr[i] = pWaves[i];
+		SafeArrayUnaccessData(*(pDispParams->rgvarg[0].pparray));
+		InitVariantFromDoubleArray(pCal, (ULONG)nValues, pVarResult);
+		delete[] pWaves;
+		delete[] pCal;
+	}
 	return S_OK;
 }
 

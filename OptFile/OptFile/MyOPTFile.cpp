@@ -1647,7 +1647,7 @@ BOOL CMyOPTFile::GetNMReferenceCalibration(
 		intValues.SetYArray(tN, tY);
 		for (i=0; i<(*nValues); i++)
 		{
-			(*ppWaves)[i]	= floor(startWave) + (i * 0.01);
+			(*ppWaves)[i]	= floor(startWave) + (i * 0.1);
 			(*ppCal)[i]		= intValues.interpolateValue((*ppWaves)[i]);
 		}
 		fSuccess	= TRUE;

@@ -138,6 +138,11 @@ library OPTFile
 		[id(DISPID_SaveSettings), helpstring("Save settings")]
 		VARIANT_BOOL	SaveSettings(
 							[in]		BSTR			workingFolder);
+		[id(DISPID_GetNMReferenceCalibration), helpstring("Get NM reference data")]
+		SAFEARRAY(double)	GetNMReferenceCalibration(
+								[in]		double			xMin,
+								[in]		double			xMax,
+								[out]		SAFEARRAY(double)* ppXValues);
 	}
 	[
 		uuid(51AC4DB2-3762-401f-8858-2E3321557636),
