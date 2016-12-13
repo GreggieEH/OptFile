@@ -29,7 +29,9 @@ CMyObject::CMyObject(IUnknown * pUnkOuter) :
 	m_dispidrequestCalibrationScan(DISPID_UNKNOWN),
 	m_dispidrequestCalibrationGain(DISPID_UNKNOWN),
 	// summary info type info
-	m_iidISummayInfo(IID_NULL)
+	m_iidISummayInfo(IID_NULL),
+	// dirty flag
+	m_fDirty(FALSE)
 {
 	if (NULL == this->m_pUnkOuter) this->m_pUnkOuter = this;
 	for (ULONG i=0; i<MAX_CONN_PTS; i++)
@@ -456,6 +458,17 @@ HRESULT CMyObject::GetRefTypeInfo(
 		pClassInfo->Release();
 	}
 	return fSuccess ? S_OK : E_FAIL;
+}
+
+// set the internal dirty flag
+void CMyObject::SetDirty(BOOL fDirty)
+{
+	this->m_fDirty = fDirty;
+}
+
+BOOL CMyObject::GetDirty()
+{
+	return this->m_fDirty;
 }
 
 CMyObject::CImpIDispatch::CImpIDispatch(CMyObject * pBackObj, IUnknown * punkOuter) :

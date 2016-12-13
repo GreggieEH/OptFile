@@ -34,6 +34,7 @@ protected:
 	BOOL			GetOurObject(
 						IDispatch	**	ppdisp);
 	void			SetPageChanged();
+	CMyObject	*	GetOurObject();
 private:
 	CMyObject	*	m_pMyObject;
 	HWND			m_hwndDlg;			// dialog handle

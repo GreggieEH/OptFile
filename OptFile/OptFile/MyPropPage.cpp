@@ -191,6 +191,12 @@ BOOL CMyPropPage::GetOurObject(
 	return SUCCEEDED(hr);
 }
 
+CMyObject* CMyPropPage::GetOurObject()
+{
+	return this->m_pMyObject;
+}
+
+
 void CMyPropPage::SetPageChanged()
 {
 	SendMessage(GetParent(this->GetMyPage()), PSM_CHANGED, (WPARAM) this->GetMyPage(), 0);

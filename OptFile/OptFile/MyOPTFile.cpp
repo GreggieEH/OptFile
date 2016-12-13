@@ -168,8 +168,6 @@ BOOL CMyOPTFile::SaveToFile()
 			pUnk->Release();
 		}
 	}
-
-
 	return this->SaveToFile(this->m_szFilePath, TRUE);
 }
 
@@ -866,6 +864,7 @@ BOOL CMyOPTFile::Setup(
 	CPropPageExtraData		propPageExtraData(this->m_pMyObject);
 	BOOL					fSuccess	= FALSE;
 
+	this->m_pMyObject->SetDirty(FALSE);
 	if (0 == lstrcmpi(Part, TEXT("Setup")))
 	{
 		if (this->m_nScans > 0)
@@ -973,6 +972,10 @@ BOOL CMyOPTFile::Setup(
 	psh.phpage		= aPages;
 	fSuccess = PropertySheet(&psh) > 0;
 	delete [] aPages;
+	if (fSuccess && this->m_pMyObject->GetDirty())
+	{
+		this->SaveToFile();
+	}
 	return fSuccess;
 }
 

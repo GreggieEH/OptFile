@@ -5,6 +5,7 @@
 //#include "MyPlotWindow.h"
 #include "SciFileOpen.h"
 #include "PlotWindow.h"
+#include "MyObject.h"
 
 CPropPageCalibrationStandard::CPropPageCalibrationStandard(CMyObject * pMyObject) :
 	CMyPropPage(pMyObject, IDD_PROPPAGE_CalibrationStandard, IDS_CalibrationStandard),
@@ -120,6 +121,7 @@ BOOL CPropPageCalibrationStandard::OnNotify(
 			// update source distance and expected distance
 			this->UpdateexpectedDistance();
 			this->UpdatesourceDistance();
+			this->GetOurObject()->SetDirty(TRUE);
 			// allow closing
 			SetWindowLongPtr(this->GetMyPage(), DWLP_MSGRESULT, (LONG)FALSE);
 		}
@@ -315,6 +317,7 @@ BOOL CPropPageCalibrationStandard::SelectCalibrationFile()
 	{
 		fSuccess = TRUE;
 		this->SetFileName(szFileName);
+		this->SetPageChanged();
 	}
 	return fSuccess;
 /*
@@ -367,8 +370,15 @@ void CPropPageCalibrationStandard::DisplayCurrentData()
 	this->m_pMyPlotWindow->ClearPlotData();
 	if (this->GetFileName(szFileName, MAX_PATH))
 	{
+//		SetDlgItemText(this->GetMyPage(), IDC_EDITFILENAME, szFileName);
+		HWND		hwnd = GetDlgItem(this->GetMyPage(), IDC_EDITFILENAME);
+		HDC			hdc = GetDC(hwnd);
+		RECT		rc;
+		GetClientRect(hwnd, &rc);
+		PathCompactPath(hdc, szFileName, rc.right - rc.left);
 		SetDlgItemText(this->GetMyPage(), IDC_EDITFILENAME, szFileName);
-//		this->SetAmLoaded(FALSE);
+		ReleaseDC(hwnd, hdc);
+
 		this->SetAmLoaded(TRUE);
 		if (this->GetAmLoaded())
 		{
@@ -422,6 +432,7 @@ void CPropPageCalibrationStandard::UpdateexpectedDistance()
 			if (1 == _stscanf_s(szString, L"%f", &f1))
 			{
 				Utils_SetDoubleProperty(pdisp, dispid, f1);
+				this->SetPageChanged();
 			}
 		}
 		pdisp->Release();
@@ -457,6 +468,7 @@ void CPropPageCalibrationStandard::UpdatesourceDistance()
 				Utils_GetMemid(pdisp, L"sourceDistance", &dispid);
 				Utils_SetDoubleProperty(pdisp, dispid, f1);
 				pdisp->Release();
+				this->SetPageChanged();
 			}
 		}
 	}

@@ -45,6 +45,9 @@ public:
 									double		**	ppSignals);
 	double						FirerequestCalibrationGain(
 									double			wavelength);
+	// set the internal dirty flag
+	void						SetDirty(BOOL fDirty);
+	BOOL						GetDirty();
 protected:
 	HRESULT						GetClassInfo(
 									ITypeInfo	**	ppTI);
@@ -548,4 +551,6 @@ private:
 	DISPID						m_dispidrequestCalibrationGain;
 	// summary info type info
 	IID							m_iidISummayInfo;
+	// dirty flag
+	BOOL						m_fDirty;
 };
