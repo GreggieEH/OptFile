@@ -110,12 +110,18 @@ BOOL CDetectorInfo::Gettemperature(
 	HRESULT			hr;
 	VARIANT			Value;
 	BOOL			fSuccess = FALSE;
+	float			fval;
 	*temperature = 0.0;
 	this->getProperty(L"temperature", &Value);
 	if (VT_BSTR == Value.vt)
 	{
+		if (1 == _stscanf_s(Value.bstrVal, L"%f", &fval))
+		{
+			fSuccess = TRUE;
+			*temperature = fval;
+		}
 		VariantClear(&Value);
-		return FALSE;
+		return fSuccess;
 	}
 	else
 	{

@@ -898,20 +898,20 @@ BOOL CMyOPTFile::Setup(
 		{
 			if (this->m_fCalibrationMeasurement)
 			{
-				nPages = 4;
-				aPages = new HPROPSHEETPAGE[nPages];
-				aPages[0] = propPageInput.doCreatePropPage();
-				aPages[1] = propPageDetector.doCreatePropPage();
-				aPages[2] = propPageSlitInfo.doCreatePropPage();			// don't display slit info if no data
-				aPages[2] = propPageCalStandard.doCreatePropPage();
-			}
-			else
-			{
 				nPages = 3;
 				aPages = new HPROPSHEETPAGE[nPages];
 				aPages[0] = propPageInput.doCreatePropPage();
 				aPages[1] = propPageDetector.doCreatePropPage();
-				aPages[2] = propPageSlitInfo.doCreatePropPage();			// don't display slit info if no data
+//				aPages[2] = propPageSlitInfo.doCreatePropPage();			// don't display slit info if no data
+				aPages[2] = propPageCalStandard.doCreatePropPage();
+			}
+			else
+			{
+				nPages = 2;
+				aPages = new HPROPSHEETPAGE[nPages];
+				aPages[0] = propPageInput.doCreatePropPage();
+				aPages[1] = propPageDetector.doCreatePropPage();
+//				aPages[2] = propPageSlitInfo.doCreatePropPage();			// don't display slit info if no data
 			}
 		}
 	}
@@ -1350,6 +1350,7 @@ BOOL CMyOPTFile::CalculateIrradiance(
 	*nValues = 0;
 	*ppWaves = NULL;
 	*ppSignal = NULL;
+
 	if (fRadianceCalc)
 	{
 //		if (!this->m_pInputInfo->getRadianceAvailable(&FOV))

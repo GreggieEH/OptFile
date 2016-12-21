@@ -241,8 +241,6 @@ BOOL CSciXML::getNodeValue(
 	return fSuccess;
 }
 
-
-
 // get the number of grating scans
 long CSciXML::GetNGratingScans(
 						long		*	nGratingScans,

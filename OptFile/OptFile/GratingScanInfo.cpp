@@ -282,7 +282,10 @@ BOOL CGratingScanInfo::CheckGratingAndFilter(
 {
 	if (this->Getgrating() != grating) return FALSE;
 	TCHAR			szString[MAX_PATH];
-	if (this->GetDetector() != detector) return FALSE;
+	if (detector >= 0 && this->GetDetector() >= 0)
+	{
+		if (this->GetDetector() != detector) return FALSE;
+	}
 	if (this->Getfilter(szString, MAX_PATH))
 		return 0 == lstrcmpi(szFilter, szString);
 	return FALSE;
